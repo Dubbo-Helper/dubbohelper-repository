@@ -1,15 +1,17 @@
 package com.dubbohelper.admin.apidoc;
 
-import com.dubbo.helper.annotations.ApidocElement;
-import com.dubbo.helper.enums.EnumIntegerCode;
-import com.dubbo.helper.enums.EnumStringCode;
+import com.dubbohelper.admin.common.AnnotationUtil;
 import com.dubbohelper.admin.elementInfo.BeanElementInfo;
 import com.dubbohelper.admin.elementInfo.ElementInfo;
 import com.dubbohelper.admin.elementInfo.ListElementInfo;
 import com.dubbohelper.admin.elementInfo.ValueElementInfo;
+import com.dubbohelper.common.annotations.ApidocElement;
+import com.dubbohelper.common.enums.EnumIntegerCode;
+import com.dubbohelper.common.enums.EnumStringCode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,6 +20,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class BeanExtractor {
@@ -42,6 +45,14 @@ public class BeanExtractor {
         Field[] fields = fieldList.toArray(new Field[fieldList.size()]);
 
         for (Field field : fields) {
+            Annotation[] fieldAnnotations = field.getAnnotations();
+            if (fieldAnnotations.length > 0) {
+                for (Annotation annotation:fieldAnnotations) {
+                    if (annotation.annotationType().getSimpleName().equals("ApidocElement")) {
+                        Map<String,String> fieldAnnotationMap = AnnotationUtil.getAnnotationDetail(annotation);
+                    }
+                }
+            }
             ApidocElement element = field.getAnnotation(ApidocElement.class);
             String desc = "";
             String version = "";

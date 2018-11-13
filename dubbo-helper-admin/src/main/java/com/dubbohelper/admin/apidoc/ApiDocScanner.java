@@ -1,5 +1,6 @@
 package com.dubbohelper.admin.apidoc;
 
+import com.dubbohelper.admin.common.AnnotationUtil;
 import com.dubbohelper.admin.elementInfo.ElementInfo;
 import com.dubbohelper.admin.util.FileUtil;
 import lombok.SneakyThrows;
@@ -16,7 +17,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -115,17 +115,18 @@ public class ApiDocScanner {
             String usage0 = "";
             String value = "";
             Annotation[] serviceAnnotations = service.getAnnotations();
-            Map<String,String> serviceAnnotationMap = new HashMap<>();
+            Map<String,String> serviceAnnotationMap;
             if (serviceAnnotations.length > 0) {
                 for (Annotation annotation:serviceAnnotations) {
                     if (annotation.annotationType().getSimpleName().equals("ApidocService")) {
-                        serviceAnnotationMap = getAnnotationDetail(annotation,"ApidocService");
+                        serviceAnnotationMap = AnnotationUtil.getAnnotationDetail(annotation);
                         if (!StringUtils.isEmpty(serviceAnnotationMap.get("usage"))) {
                             usage0 = serviceAnnotationMap.get("usage");
                         }
                         if (!StringUtils.isEmpty(serviceAnnotationMap.get("value"))) {
                             value = serviceAnnotationMap.get("value");
                         }
+                        break;
                     }
                 }
             }
@@ -139,11 +140,11 @@ public class ApiDocScanner {
                 String name = service.getName() + "." + m.getName();
                 String usage = usage0;
                 String desc = "";
-                Annotation[] annotations = m.getAnnotations();
-                if (annotations.length > 0) {
-                    for (Annotation annotation:annotations) {
+                Annotation[] interfaceAnnotations = m.getAnnotations();
+                if (interfaceAnnotations.length > 0) {
+                    for (Annotation annotation:interfaceAnnotations) {
                         if (annotation.annotationType().getSimpleName().equals("ApidocInterface")) {
-                            Map<String,String> interfaceAnnotationMap = getAnnotationDetail(annotation, "ApidocInterface");
+                            Map<String,String> interfaceAnnotationMap = AnnotationUtil.getAnnotationDetail(annotation);
                             desc = interfaceAnnotationMap.get("value");
                             if (!StringUtils.isEmpty(interfaceAnnotationMap.get("usage"))) {
                                 usage = interfaceAnnotationMap.get("usage");
@@ -161,7 +162,7 @@ public class ApiDocScanner {
                         requestClazz = m.getParameterTypes()[0];
                         interfaceInfo.setRequestName(requestClazz.getName());
                     } else {
-                        log.warn("{}.{} 存在过多参数", service.getName(), m.getName());
+                        log.error("{}.{} 存在过多参数", service.getName(), m.getName());
                         break;
                     }
                 }
@@ -233,20 +234,6 @@ public class ApiDocScanner {
         return new Class[0];
     }
 
-    private Map<String,String> getAnnotationDetail(Annotation annotation,String type) {
-        int beginLength = annotation.toString().indexOf(type);
-        int endLength = annotation.toString().length();
-        String data1 = annotation.toString().substring(beginLength + type.length() + 1,endLength-1);
-        String[] data2 = data1.split(",");
-        Map<String, String> map = new HashMap<>();
-        for (String data3:data2) {
-            String[] data4 = data3.split("=");
-            if (data4.length == 2) {
-                map.put(data4[0].trim(),data4[1].trim());
-            }
-        }
 
-        return map;
-    }
 
 }

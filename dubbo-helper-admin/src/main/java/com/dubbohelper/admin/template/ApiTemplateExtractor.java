@@ -5,6 +5,7 @@ import com.dubbohelper.admin.apidoc.ServiceInfo;
 import com.dubbohelper.admin.elementInfo.ElementInfo;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -23,8 +24,8 @@ public class ApiTemplateExtractor {
      * @param responseContent
      * @throws Exception
      */
-    public void buildDocBody(Model model, List<ServiceInfo> serviceList, List<InterfaceInfo> interfaceList,
-                               InterfaceInfo currentInterfaceInfo, List<ElementInfo> requestContent, List<ElementInfo> responseContent) throws Exception{
+    public void buildDocBody(ModelAndView model, List<ServiceInfo> serviceList, List<InterfaceInfo> interfaceList,
+                             InterfaceInfo currentInterfaceInfo, List<ElementInfo> requestContent, List<ElementInfo> responseContent) throws Exception{
 
         String currentService = "";
         if(!StringUtils.isEmpty(currentInterfaceInfo.getClassName())){
@@ -60,14 +61,14 @@ public class ApiTemplateExtractor {
         }
 
         // 设置变量
-        model.addAttribute("serviceList", serviceList);
-        model.addAttribute("interfaceList", interfaceList);
-        model.addAttribute("currentService", currentService);
-        model.addAttribute("currentMethod", currentMethod);
-        model.addAttribute("usage", usage);
-        model.addAttribute("requestClass", requestClass);
-        model.addAttribute("requestContent", requestContent);
-        model.addAttribute("responseClass", responseClass);
-        model.addAttribute("responseContent", responseContent);
+        model.addObject("serviceList", serviceList);
+        model.addObject("interfaceList", interfaceList);
+        model.addObject("currentService", currentService);
+        model.addObject("currentMethod", currentMethod);
+        model.addObject("usage", usage);
+        model.addObject("requestClass", requestClass);
+        model.addObject("requestContent", requestContent);
+        model.addObject("responseClass", responseClass);
+        model.addObject("responseContent", responseContent);
     }
 }
