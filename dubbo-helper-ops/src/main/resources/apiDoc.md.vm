@@ -1,0 +1,34 @@
+# $!{mapKey}  API文档
+
+#foreach($service in ${serviceList.keySet()})
+$!{velocityCount}、$!{service.desc}
+=================
+$!{service.className}
+
+#foreach($interface in ${serviceList.get($service)})
+$!{velocityCount}、$!{interface.desc}($!{interface.methodName})
+--------------
+
+#macro(Parameter $elements $parentname)
+#foreach($element in $elements)
+#if($!{element.type} == 'list' || $!{element.type} == 'bean')
+|$parentname$!{element.name}|$!{element.type}|$!{element.required}|$!{element.desc}|#foreach($enum in $!{element.enumDesc})$!{enum}#end|
+#set($elementname=$!{element.name} + '.')
+#Parameter($!{element.elements} $elementname)
+#else
+|$parentname$!{element.name}|$!{element.dataType}|$!{element.required}|$!{element.desc}|#foreach($enum in $!{element.enumDesc})$!{enum}#end|
+#end
+#end
+#end
+
+*Request请求要素*
+| 参数名称  |   参数类型   | 必输  |   参数描述   |   字典描述   |
+|:-----------:|:------------:|:-----:|:------------:|:-------------:|
+#Parameter($!{interface.request} '')
+*Response应答要素*
+| 参数名称  |   参数类型   | 必输  |   参数描述   |   字典描述   |
+|:-----------:|:------------:|:-----:|:------------:|:-------------:|
+#Parameter($!{interface.response} '')
+
+#end
+#end
