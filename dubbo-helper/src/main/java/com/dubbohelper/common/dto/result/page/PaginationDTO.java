@@ -18,8 +18,11 @@ import java.io.Serializable;
 public class PaginationDTO implements Serializable {
 
     private Integer pageIndex;
+
     private Integer pageSize;
+
     private Integer totalRecord;
+
     private Integer totalPage;
 
     public PaginationDTO() {

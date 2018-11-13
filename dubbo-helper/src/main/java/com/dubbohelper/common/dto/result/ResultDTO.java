@@ -27,34 +27,15 @@ public class ResultDTO extends BaseResult {
         super.setSuccess(success);
         super.setCode(code);
         super.setDescription(description);
-        if (!success && "9000".equals(code)) {
-            super.setSuccess(!success);
-            super.setCode("0000");
-            super.setDescription("");
-            ResultDTO.BizResultDTO bizResultDTO = this.createBizResult();
-            bizResultDTO.setCode(code);
-            bizResultDTO.setSuccess(success);
-            bizResultDTO.setDescription(description);
-        }
 
+        ResultDTO.BizResultDTO bizResultDTO = this.createBizResult();
+        bizResultDTO.setCode(code);
+        bizResultDTO.setSuccess(success);
+        bizResultDTO.setDescription(description);
     }
 
     public ResultDTO(boolean success, ResultCodeEnum resultCode, String description) {
-        this.bizResultDTO = new ResultDTO.BizResultDTO();
-        String code = resultCode.getCode();
-        super.setSuccess(success);
-        super.setCode(code);
-        super.setDescription(description);
-        if (!success && resultCode.equals(ResultCodeEnum.PARAM_FAIL)) {
-            super.setSuccess(!success);
-            super.setCode(ResultCodeEnum.SUCCESS.getCode());
-            super.setDescription("");
-            ResultDTO.BizResultDTO bizResultDTO = this.createBizResult();
-            bizResultDTO.setCode(code);
-            bizResultDTO.setSuccess(success);
-            bizResultDTO.setDescription(description);
-        }
-
+        this(success, resultCode.getCode(), description);
     }
 
     public ResultDTO(String sid, boolean success, String code, String description) {
@@ -78,8 +59,11 @@ public class ResultDTO extends BaseResult {
     @Setter
     @ToString
     public final class BizResultDTO implements Serializable {
+
         private Boolean success;
+
         private String code;
+
         private String description;
 
         private BizResultDTO() {

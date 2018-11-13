@@ -16,6 +16,7 @@ import lombok.ToString;
 public class PageQueryParamDTO extends RequestDTO<PageQueryParamDTO> {
 
     private Integer pageSize;
+
     private Integer pageIndex;
 
     public PageQueryParamDTO() {

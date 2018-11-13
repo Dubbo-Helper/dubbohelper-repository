@@ -15,15 +15,23 @@ import java.io.Serializable;
 @Setter
 public class BaseResult implements Serializable {
 
-    /** 请求标识号 */
+    /**
+     * 请求标识号
+     */
     private String sid;
 
-    /** 成功标志 */
+    /**
+     * 成功标志
+     */
     private boolean success;
 
-    /** 信息码 */
+    /**
+     * 信息码
+     */
     private String code;
 
-    /** 描述 */
+    /**
+     * 描述
+     */
     private String description;
 }

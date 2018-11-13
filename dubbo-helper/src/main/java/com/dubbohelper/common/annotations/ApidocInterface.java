@@ -14,7 +14,7 @@ public @interface ApidocInterface {
     /**
      * 方法描述
      */
-    String value();
+    String value() default "";
 
     /**
      * 用法

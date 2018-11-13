@@ -2,6 +2,7 @@ package com.dubbohelper.common.controller;
 
 import com.dubbohelper.common.dto.result.BaseResult;
 import com.dubbohelper.common.dto.PostRequest;
+import com.dubbohelper.common.dto.result.ResultDTO;
 import com.dubbohelper.common.enums.ResultCodeEnum;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -15,8 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -40,8 +39,9 @@ public class ApiController implements ApplicationContextAware {
     @RequestMapping({"/{service}/{method}"})
     public Object invoke(@ModelAttribute PostRequest postRequest,
                          @PathVariable("service") String service,
-                         @PathVariable("method") String method,
-                         HttpServletRequest request, HttpServletResponse response) {
+                         @PathVariable("method") String method) {
+
+        ResultDTO resultDTO = new ResultDTO();
         BaseResult result = new BaseResult();
         postRequest.setService(service);
         postRequest.setMethod(method);
@@ -55,7 +55,7 @@ public class ApiController implements ApplicationContextAware {
             } catch (ClassNotFoundException e) {
                 log.error("class not found!", e);
                 result.setSuccess(Boolean.FALSE);
-                result.setCode("2");
+                result.setCode(ResultCodeEnum.FAIL.getCode());
                 result.setDescription("service not found," + postRequest.getService());
                 return gson.toJson(result);
             }
@@ -67,7 +67,7 @@ public class ApiController implements ApplicationContextAware {
         } catch (BeansException e) {
             log.error("bean not found!", e);
             result.setSuccess(Boolean.FALSE);
-            result.setCode("2");
+            result.setCode(ResultCodeEnum.FAIL.getCode());
             result.setDescription("bean not found," + postRequest.getService());
             return gson.toJson(result);
         }
@@ -80,8 +80,8 @@ public class ApiController implements ApplicationContextAware {
             }
         }
         if (methodReflect == null) {
-            result.setSuccess(false);
-            result.setCode("3");
+            result.setSuccess(Boolean.FALSE);
+            result.setCode(ResultCodeEnum.FAIL.getCode());
             result.setDescription("method not found" + postRequest.getMethod());
             return gson.toJson(result);
         }
@@ -92,7 +92,7 @@ public class ApiController implements ApplicationContextAware {
             inputParam = new Object[]{gson.fromJson(postRequest.getParam().replaceAll("&quot;","\""), paramTypes[0])};
         } else {
             result.setSuccess(Boolean.FALSE);
-            result.setCode("4");
+            result.setCode(ResultCodeEnum.FAIL.getCode());
             result.setDescription("parameter is error," + postRequest.getMethod());
             return gson.toJson(result);
         }
@@ -101,19 +101,19 @@ public class ApiController implements ApplicationContextAware {
             return gson.toJson(callResult);
         } catch (InvocationTargetException e) {
             log.error("call service error:", e);
-            result.setSuccess(Boolean.FALSE);
-            result.setCode(ResultCodeEnum.FAIL.getCode());
-            result.setDescription("call service error," + postRequest.getService());
+            resultDTO.setSuccess(Boolean.FALSE);
+            resultDTO.setCode(ResultCodeEnum.FAIL.getCode());
+            resultDTO.setDescription("call service error," + postRequest.getService());
         } catch (IllegalArgumentException e) {
             log.error("illegal argument error:", e);
-            result.setSuccess(Boolean.FALSE);
-            result.setCode(ResultCodeEnum.PARAM_FAIL.getCode());
-            result.setDescription("call service illegal argument error," + postRequest.getService());
+            resultDTO.setSuccess(Boolean.FALSE);
+            resultDTO.setCode(ResultCodeEnum.PARAM_FAIL.getCode());
+            resultDTO.setDescription("call service illegal argument error," + postRequest.getService());
         } catch (Exception e) {
             log.error("unkown error:", e);
-            result.setSuccess(Boolean.FALSE);
-            result.setCode(ResultCodeEnum.FAIL.getCode());
-            result.setDescription("call service unkown error," + postRequest.getService());
+            resultDTO.setSuccess(Boolean.FALSE);
+            resultDTO.setCode(ResultCodeEnum.FAIL.getCode());
+            resultDTO.setDescription("call service unkown error," + postRequest.getService());
         }finally {
             // 如果没有加入缓存，加入缓存
             if (localCacheMap.get(fullServiceName) == null) {
@@ -121,7 +121,7 @@ public class ApiController implements ApplicationContextAware {
             }
         }
 
-        return gson.toJson(result);
+        return gson.toJson(resultDTO);
     }
 
     private ApplicationContext ctx;

@@ -19,6 +19,7 @@ import java.util.List;
 public class PaginationResultDTO<T> extends ResultDTO {
 
     private PaginationDTO paginationDTO;
+
     private List<T> results;
 
     public PaginationResultDTO() {

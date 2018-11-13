@@ -14,7 +14,7 @@ public @interface ApidocService {
     /**
      * 服务描述
      */
-    String value();
+    String value() default "";
 
     /**
      * 用法
