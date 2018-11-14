@@ -1,4 +1,4 @@
-package com.dubbohelper.admin.common;
+package com.dubbohelper.admin.util;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,14 +24,14 @@ public class AnnotationUtil {
      * @return
      */
     public static Map<String,String> getAnnotationDetail(Annotation annotation) {
-        Map memberValues = new HashMap<>();
+        Map memberValues = new HashMap<>(16);
         try {
             InvocationHandler ih = Proxy.getInvocationHandler(annotation);
             Field memberValuesField = ih.getClass().getDeclaredField("memberValues");
             memberValuesField.setAccessible(true);
             memberValues = (Map) memberValuesField.get(ih);
         } catch (Exception e) {
-            log.error("解析注解失败:{}",annotation.toString());
+            log.error("解析注解失败:{}",annotation.toString(), e);
         }
 
         return memberValues;

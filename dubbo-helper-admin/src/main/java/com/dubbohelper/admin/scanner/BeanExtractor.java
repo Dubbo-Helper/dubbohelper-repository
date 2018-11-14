@@ -1,10 +1,10 @@
-package com.dubbohelper.admin.apidoc;
+package com.dubbohelper.admin.scanner;
 
-import com.dubbohelper.admin.common.AnnotationUtil;
-import com.dubbohelper.admin.elementInfo.BeanElementInfo;
-import com.dubbohelper.admin.elementInfo.ElementInfo;
-import com.dubbohelper.admin.elementInfo.ListElementInfo;
-import com.dubbohelper.admin.elementInfo.ValueElementInfo;
+import com.dubbohelper.admin.scanner.elementInfo.BeanElementInfo;
+import com.dubbohelper.admin.scanner.elementInfo.ElementInfo;
+import com.dubbohelper.admin.scanner.elementInfo.ListElementInfo;
+import com.dubbohelper.admin.scanner.elementInfo.ValueElementInfo;
+import com.dubbohelper.admin.util.AnnotationUtil;
 import com.dubbohelper.common.annotations.ApidocElement;
 import com.dubbohelper.common.enums.EnumIntegerCode;
 import com.dubbohelper.common.enums.EnumStringCode;
@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -49,7 +48,9 @@ public class BeanExtractor {
             if (fieldAnnotations.length > 0) {
                 for (Annotation annotation:fieldAnnotations) {
                     if (annotation.annotationType().getSimpleName().equals("ApidocElement")) {
+                        ElementInfo elementInfo = null;
                         Map<String,String> fieldAnnotationMap = AnnotationUtil.getAnnotationDetail(annotation);
+                        log.info("test");
                     }
                 }
             }
@@ -72,7 +73,7 @@ public class BeanExtractor {
                 elementInfo = valueElementInfo;
             }else if (field.getType().getName().startsWith("com.dubbo.helper")) {
                 if (!Serializable.class.isAssignableFrom(field.getType())) {
-                    log.warn("{}.{} 未实现序列化", clazz.getName(), field.getName());
+                    log.error("{}.{} 未实现序列化", clazz.getName(), field.getName());
                 }
                 if(clazz == field.getType()){
                     log.error("{}.{} 存在循环引用的情况", clazz.getName(), field.getName());
@@ -141,10 +142,8 @@ public class BeanExtractor {
                     Object code = getCodeMethod.invoke(val);
                     Object desc = getDescMethod.invoke(val);
                     list.add(code + ":" + desc);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    log.error("解析枚举类失败:{}",enumClass.toString(),e);
                 }
             }
         }

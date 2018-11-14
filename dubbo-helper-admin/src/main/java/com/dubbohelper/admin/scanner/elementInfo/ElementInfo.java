@@ -1,4 +1,4 @@
-package com.dubbohelper.admin.elementInfo;
+package com.dubbohelper.admin.scanner.elementInfo;
 
 public interface ElementInfo {
 

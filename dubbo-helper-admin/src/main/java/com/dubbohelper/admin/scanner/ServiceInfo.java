@@ -1,4 +1,4 @@
-package com.dubbohelper.admin.apidoc;
+package com.dubbohelper.admin.scanner;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

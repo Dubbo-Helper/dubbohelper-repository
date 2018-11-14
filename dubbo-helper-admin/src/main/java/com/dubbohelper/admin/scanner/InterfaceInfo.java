@@ -1,6 +1,6 @@
-package com.dubbohelper.admin.apidoc;
+package com.dubbohelper.admin.scanner;
 
-import com.dubbohelper.admin.elementInfo.ElementInfo;
+import com.dubbohelper.admin.scanner.elementInfo.ElementInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

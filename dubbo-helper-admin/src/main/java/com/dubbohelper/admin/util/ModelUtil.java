@@ -1,9 +1,9 @@
-package com.dubbohelper.admin.template;
+package com.dubbohelper.admin.util;
 
-import com.dubbohelper.admin.apidoc.InterfaceInfo;
-import com.dubbohelper.admin.apidoc.ServiceInfo;
-import com.dubbohelper.admin.elementInfo.ElementInfo;
-import org.springframework.ui.Model;
+import com.dubbohelper.admin.scanner.InterfaceInfo;
+import com.dubbohelper.admin.scanner.ServiceInfo;
+import com.dubbohelper.admin.scanner.elementInfo.ElementInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -11,7 +11,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 
-public class ApiTemplateExtractor {
+/**
+ * 组装视图model工具
+ *
+ * @author lijinbo
+ * @since 1.0.0
+ */
+@Slf4j
+public class ModelUtil {
 
     /**
      * 填充model
@@ -24,7 +31,7 @@ public class ApiTemplateExtractor {
      * @param responseContent
      * @throws Exception
      */
-    public void buildDocBody(ModelAndView model, List<ServiceInfo> serviceList, List<InterfaceInfo> interfaceList,
+    public static void getModel(ModelAndView model, List<ServiceInfo> serviceList, List<InterfaceInfo> interfaceList,
                              InterfaceInfo currentInterfaceInfo, List<ElementInfo> requestContent, List<ElementInfo> responseContent) throws Exception{
 
         String currentService = "";

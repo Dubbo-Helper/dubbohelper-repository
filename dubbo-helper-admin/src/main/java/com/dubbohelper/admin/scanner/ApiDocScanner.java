@@ -1,7 +1,7 @@
-package com.dubbohelper.admin.apidoc;
+package com.dubbohelper.admin.scanner;
 
-import com.dubbohelper.admin.common.AnnotationUtil;
-import com.dubbohelper.admin.elementInfo.ElementInfo;
+import com.dubbohelper.admin.util.AnnotationUtil;
+import com.dubbohelper.admin.scanner.elementInfo.ElementInfo;
 import com.dubbohelper.admin.util.FileUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,7 @@ public class ApiDocScanner {
     private final Map<ServiceInfo, List<InterfaceInfo>> INTERFACE_CACHE = new ConcurrentHashMap<ServiceInfo, List<InterfaceInfo>>();
 
     @SneakyThrows
-    public void downloadApiDoc(String fileName, OutputStream outputStream) throws FileNotFoundException {
+    public void downloadApiDoc(String fileName, OutputStream outputStream) {
         FileUtil.createApiDocFile(INTERFACE_CACHE,fileName);
 
         File file = new File(FileUtil.getFilePath(fileName));
@@ -60,7 +60,7 @@ public class ApiDocScanner {
      */
     public List<InterfaceInfo> listInterface(String className) {
         for (ServiceInfo serviceInfo : INTERFACE_CACHE.keySet()) {
-            if (serviceInfo.className.equals(className)) {
+            if (serviceInfo.getClassName().equals(className)) {
                 List<InterfaceInfo> list = INTERFACE_CACHE.get(serviceInfo);
                 Collections.sort(list);
                 return list;
@@ -76,7 +76,7 @@ public class ApiDocScanner {
      */
     public InterfaceInfo interfaceDetail(String className, String methodName) {
         for (ServiceInfo serviceInfo : INTERFACE_CACHE.keySet()) {
-            if (serviceInfo.className.equals(className)) {
+            if (serviceInfo.getClassName().equals(className)) {
                 List<InterfaceInfo> interfaceInfoList = INTERFACE_CACHE.get(serviceInfo);
                 for (InterfaceInfo interfaceInfo : interfaceInfoList) {
                     if (interfaceInfo.getMethodName().equals(methodName)) {
@@ -168,15 +168,11 @@ public class ApiDocScanner {
                 }
                 Class returnClazz = m.getReturnType();
                 Set<String> responseSet = new HashSet<String>();
-                responseSet.add("com.dubbohelper.common.dto.result.ItemResultDTO");
-                responseSet.add("com.dubbohelper.common.dto.result.ListResultDTO");
-                responseSet.add("com.dubbohelper.common.dto.result.page.PaginationResultDTO");
-                responseSet.add("com.zhubajie.finance.common.dto.PaginationResultDTO");
-                responseSet.add("com.zhubajie.finance.common.dto.ItemResultDTO");
-                responseSet.add("com.zhubajie.finance.common.dto.ListResultDTO");
+                responseSet.add("ItemResultDTO");
+                responseSet.add("ListResultDTO");
+                responseSet.add("PaginationResultDTO");
 
-
-                if (responseSet.contains(returnClazz.getName())) {
+                if (responseSet.contains(returnClazz.getSimpleName())) {
                     Class[] classes = null;
                     try {
                         classes = extractInterfaceMethodReturn(m);
@@ -193,7 +189,7 @@ public class ApiDocScanner {
                     }
                 }
 
-                if("com.dubbohelper.common.dto.result.ResultDTO".equals(returnClazz.getName())){
+                if("ResultDTO".equals(returnClazz.getSimpleName())){
                     returnClazz = null;
                 }
 

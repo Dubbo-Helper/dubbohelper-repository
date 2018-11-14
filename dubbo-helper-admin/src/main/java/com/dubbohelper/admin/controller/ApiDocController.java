@@ -1,14 +1,12 @@
 package com.dubbohelper.admin.controller;
 
-import com.dubbohelper.admin.apidoc.ApiDocScanner;
-import com.dubbohelper.admin.apidoc.InterfaceInfo;
-import com.dubbohelper.admin.apidoc.ServiceInfo;
-import com.dubbohelper.admin.template.ApiTemplateExtractor;
+import com.dubbohelper.admin.scanner.ApiDocScanner;
+import com.dubbohelper.admin.scanner.InterfaceInfo;
+import com.dubbohelper.admin.scanner.ServiceInfo;
+import com.dubbohelper.admin.util.ModelUtil;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
@@ -33,27 +31,25 @@ public class ApiDocController implements InitializingBean {
     @RequestMapping("")
     public ModelAndView listServices() throws Exception{
         List<ServiceInfo> serviceList  = scanner.listService();
-        ApiTemplateExtractor apiTemplateExtractor = new ApiTemplateExtractor();
 
-        ModelAndView mode = new ModelAndView("index");
+        ModelAndView modelAndView = new ModelAndView("index");
         InterfaceInfo currentInterfaceInfo = new InterfaceInfo();
-        apiTemplateExtractor.buildDocBody(mode,serviceList,null,currentInterfaceInfo,null,null);
+        ModelUtil.getModel(modelAndView,serviceList,null,currentInterfaceInfo,null,null);
 
-        return mode;
+        return modelAndView;
     }
 
     @RequestMapping("/method")
     public ModelAndView listInterfaces(String service) throws Exception{
         List<ServiceInfo> serviceList  = scanner.listService();
         List<InterfaceInfo> interfaceList = scanner.listInterface(service);
-        ApiTemplateExtractor apiTemplateExtractor = new ApiTemplateExtractor();
 
-        ModelAndView mode = new ModelAndView("index");
+        ModelAndView modelAndView = new ModelAndView("index");
         InterfaceInfo currentInterfaceInfo = new InterfaceInfo();
         currentInterfaceInfo.setClassName(service);
-        apiTemplateExtractor.buildDocBody(mode,serviceList,interfaceList,currentInterfaceInfo,null,null);
+        ModelUtil.getModel(modelAndView,serviceList,interfaceList,currentInterfaceInfo,null,null);
 
-        return mode;
+        return modelAndView;
     }
 
     @RequestMapping("/document")
@@ -62,14 +58,12 @@ public class ApiDocController implements InitializingBean {
         List<ServiceInfo> serviceList  = scanner.listService();
         List<InterfaceInfo> interfaceList = scanner.listInterface(service);
         InterfaceInfo interfaceInfo = scanner.interfaceDetail(service, method);
-        ApiTemplateExtractor apiTemplateExtractor = new ApiTemplateExtractor();
 
-        ModelAndView mode = new ModelAndView("index");
-        apiTemplateExtractor.buildDocBody(mode,serviceList,interfaceList,interfaceInfo, interfaceInfo.getRequest(),interfaceInfo.getResponse());
+        ModelAndView modelAndView = new ModelAndView("index");
+        ModelUtil.getModel(modelAndView,serviceList,interfaceList,interfaceInfo, interfaceInfo.getRequest(),interfaceInfo.getResponse());
 
-        return mode;
+        return modelAndView;
     }
-
 
     @RequestMapping("downloadApiDoc")
     public void downloadApiDoc(HttpServletRequest request, HttpServletResponse response) {
