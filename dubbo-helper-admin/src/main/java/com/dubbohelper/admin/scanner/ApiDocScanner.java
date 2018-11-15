@@ -88,7 +88,7 @@ public class ApiDocScanner {
         return null;
     }
 
-    public synchronized void init(boolean ifThrow, String...docScanPackages) {
+    public synchronized void init(String...docScanPackages) {
         if(docScanPackages == null || docScanPackages.length == 0){
             log.info("docScanPackages is null");
             return;
@@ -102,24 +102,28 @@ public class ApiDocScanner {
         log.debug("scan @ApidocService size:{}", apiDocServices.size());
         log.debug("scan @ApidocService {}", apiDocServices);
 
-        initService(ifThrow,apiDocServices);
+        initService(apiDocServices);
     }
 
-    private void initService(boolean ifThrow,Set<Class<?>> apiDocServices) {
+    /**
+     * 解析Service注解
+     * @param apiDocServices 接口
+     */
+    private void initService(Set<Class<?>> apiDocServices) {
         for (Class<?> service : apiDocServices) {
             if (!service.isInterface()) {
                 log.warn("{} is not interface", service);
                 continue;
             }
 
+            //解析Service
             String usage0 = "";
             String value = "";
             Annotation[] serviceAnnotations = service.getAnnotations();
-            Map<String,String> serviceAnnotationMap;
             if (serviceAnnotations.length > 0) {
                 for (Annotation annotation:serviceAnnotations) {
-                    if (annotation.annotationType().getSimpleName().equals("ApidocService")) {
-                        serviceAnnotationMap = AnnotationUtil.getAnnotationDetail(annotation);
+                    if ("ApidocService".equals(annotation.annotationType().getSimpleName())) {
+                        Map<String,String> serviceAnnotationMap = AnnotationUtil.getAnnotationDetail(annotation);
                         if (!StringUtils.isEmpty(serviceAnnotationMap.get("usage"))) {
                             usage0 = serviceAnnotationMap.get("usage");
                         }
@@ -130,20 +134,20 @@ public class ApiDocScanner {
                     }
                 }
             }
-
             ServiceInfo serviceInfo = new ServiceInfo(value, service.getName(), usage0);
             List<InterfaceInfo> interfaceInfos = new ArrayList<InterfaceInfo>();
             INTERFACE_CACHE.put(serviceInfo, interfaceInfos);
 
             Method[] methods = service.getMethods();
             for (Method m : methods) {
+                //解析Method
                 String name = service.getName() + "." + m.getName();
                 String usage = usage0;
                 String desc = "";
                 Annotation[] interfaceAnnotations = m.getAnnotations();
                 if (interfaceAnnotations.length > 0) {
                     for (Annotation annotation:interfaceAnnotations) {
-                        if (annotation.annotationType().getSimpleName().equals("ApidocInterface")) {
+                        if ("ApidocInterface".equals(annotation.annotationType().getSimpleName())) {
                             Map<String,String> interfaceAnnotationMap = AnnotationUtil.getAnnotationDetail(annotation);
                             desc = interfaceAnnotationMap.get("value");
                             if (!StringUtils.isEmpty(interfaceAnnotationMap.get("usage"))) {
@@ -152,17 +156,17 @@ public class ApiDocScanner {
                         }
                     }
                 }
-
                 InterfaceInfo interfaceInfo = new InterfaceInfo(name,desc, usage, service.getName(), m.getName(),"","");
                 interfaceInfos.add(interfaceInfo);
-                //加载接口请求、响应
+
+                //解析Request、Response
                 Class requestClazz = null;
                 if (m.getParameterTypes().length > 0) {
                     if (m.getParameterTypes().length == 1) {
                         requestClazz = m.getParameterTypes()[0];
                         interfaceInfo.setRequestName(requestClazz.getName());
                     } else {
-                        log.error("{}.{} 存在过多参数", service.getName(), m.getName());
+                        log.error("{}.{} 存在过多参数,只允许单一参数", service.getName(), m.getName());
                         break;
                     }
                 }
@@ -171,37 +175,23 @@ public class ApiDocScanner {
                 responseSet.add("ItemResultDTO");
                 responseSet.add("ListResultDTO");
                 responseSet.add("PaginationResultDTO");
-
                 if (responseSet.contains(returnClazz.getSimpleName())) {
-                    Class[] classes = null;
-                    try {
-                        classes = extractInterfaceMethodReturn(m);
-                        if (classes.length != 1) {
-                            log.error("{}.{} 返回值泛型信息不为一个", service.getName(), m.getName());
-                            break;
-                        }
-                        returnClazz = classes[0];
-                        interfaceInfo.setResponseName(returnClazz.getName());
-                    } catch (Exception e) {
-                        if (ifThrow) {
-
-                        }
+                    Class[] classes = extractInterfaceMethodReturn(m);
+                    if (classes.length != 1) {
+                        log.error("{}.{} 返回值泛型信息不为一个", service.getName(), m.getName());
+                        break;
                     }
+                    returnClazz = classes[0];
+                    interfaceInfo.setResponseName(returnClazz.getName());
                 }
 
-                if("ResultDTO".equals(returnClazz.getSimpleName())){
-                    returnClazz = null;
-                }
-
-                BeanExtractor extractor = new BeanExtractor();
+                ParameterScanner parameterScanner = new ParameterScanner();
                 if (requestClazz != null) {
-                    List<ElementInfo> requests = extractor.extract(requestClazz);
+                    List<ElementInfo> requests = parameterScanner.extract(requestClazz);
                     interfaceInfo.getRequest().addAll(requests);
                 }
-                if (returnClazz != null) {
-                    List<ElementInfo> responses = extractor.extract(returnClazz);
-                    interfaceInfo.getResponse().addAll(responses);
-                }
+                List<ElementInfo> responses = parameterScanner.extract(returnClazz);
+                interfaceInfo.getResponse().addAll(responses);
             }
         }
     }

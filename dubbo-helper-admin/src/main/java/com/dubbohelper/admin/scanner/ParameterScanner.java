@@ -8,6 +8,8 @@ import com.dubbohelper.admin.util.AnnotationUtil;
 import com.dubbohelper.common.annotations.ApidocElement;
 import com.dubbohelper.common.enums.EnumIntegerCode;
 import com.dubbohelper.common.enums.EnumStringCode;
+import com.dubbohelper.common.enums.ResultCodeEnum;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
@@ -18,11 +20,12 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class BeanExtractor {
+public class ParameterScanner {
 
     public List<ElementInfo> extract(Class clazz) {
         return extract0(clazz, 0);
@@ -41,37 +44,36 @@ public class BeanExtractor {
             fieldList.addAll(Arrays.asList(superClass.getDeclaredFields()));
         }
         fieldList.addAll(Arrays.asList(clazz.getDeclaredFields()));
-        Field[] fields = fieldList.toArray(new Field[fieldList.size()]);
 
-        for (Field field : fields) {
+        for (Field field : fieldList) {
+            Map<String,String> fieldAnnotationMap = null;
             Annotation[] fieldAnnotations = field.getAnnotations();
             if (fieldAnnotations.length > 0) {
                 for (Annotation annotation:fieldAnnotations) {
                     if (annotation.annotationType().getSimpleName().equals("ApidocElement")) {
-                        ElementInfo elementInfo = null;
-                        Map<String,String> fieldAnnotationMap = AnnotationUtil.getAnnotationDetail(annotation);
-                        log.info("test");
+                        fieldAnnotationMap = AnnotationUtil.getAnnotationDetail(annotation);
+                        break;
                     }
                 }
             }
             ApidocElement element = field.getAnnotation(ApidocElement.class);
             String desc = "";
             String version = "";
-            if(element != null){
-                desc = element.value();
+            if(fieldAnnotationMap != null){
+                desc = fieldAnnotationMap.get("value");
                 version = "1.0";
             }
             ElementInfo elementInfo = null;
             if (field.getType().isEnum()) {
                 ValueElementInfo valueElementInfo = null;
-
-                if(element != null){
-                    valueElementInfo = new ValueElementInfo(field.getName(), desc,"", field.getType().getSimpleName(), element.required(), element.minLen(), element.maxLen(), element.defVal());
+                if(fieldAnnotationMap != null){
+                    valueElementInfo = new ValueElementInfo(field.getName(), desc,"", field.getType().getSimpleName(),
+                            Boolean.valueOf(fieldAnnotationMap.get("required")), Integer.valueOf(fieldAnnotationMap.get("minLen")), Integer.valueOf(fieldAnnotationMap.get("maxLen")), fieldAnnotationMap.get("defVal"));
                 }else{
                     valueElementInfo = new ValueElementInfo(field.getName(), desc, "",field.getType().getSimpleName(), true, 0, 0, "");
                 }
                 elementInfo = valueElementInfo;
-            }else if (field.getType().getName().startsWith("com.dubbo.helper")) {
+            } else if (field.getType().getName().startsWith("com.zbj.finance")) {
                 if (!Serializable.class.isAssignableFrom(field.getType())) {
                     log.error("{}.{} 未实现序列化", clazz.getName(), field.getName());
                 }
@@ -84,7 +86,6 @@ public class BeanExtractor {
                 elementInfo = beanElementInfo;
             } else if(field.getType() == List.class){
                 ListElementInfo listElementInfo = new ListElementInfo(field.getName(), desc, version);
-                elementInfo = listElementInfo;
                 Type type = field.getGenericType();
                 //检查泛型
                 if (type instanceof ParameterizedType) {
@@ -95,6 +96,7 @@ public class BeanExtractor {
                     //对多条的数据进行提取
                     listElementInfo.getElements().addAll(extract0(modelClass, deep));
                 }
+                elementInfo = listElementInfo;
             } else {
                 List<String> enums = new ArrayList<String>();
                 if (element != null && element.enumClass() != Enum.class) {
