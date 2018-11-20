@@ -1,8 +1,9 @@
 package com.dubbohelper.admin.scanner;
 
-import com.dubbohelper.admin.util.AnnotationUtil;
 import com.dubbohelper.admin.scanner.elementInfo.ElementInfo;
 import com.dubbohelper.admin.util.FileUtil;
+import com.dubbohelper.common.annotations.ApidocInterface;
+import com.dubbohelper.common.annotations.ApidocService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
@@ -11,7 +12,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.OutputStream;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -112,26 +112,20 @@ public class ApiDocScanner {
     private void initService(Set<Class<?>> apiDocServices) {
         for (Class<?> service : apiDocServices) {
             if (!service.isInterface()) {
-                log.warn("{} is not interface", service);
+                log.error("{} is not interface", service);
                 continue;
             }
 
             //解析Service
+            ApidocService apidocService = service.getAnnotation(ApidocService.class);
             String usage0 = "";
             String value = "";
-            Annotation[] serviceAnnotations = service.getAnnotations();
-            if (serviceAnnotations.length > 0) {
-                for (Annotation annotation:serviceAnnotations) {
-                    if ("ApidocService".equals(annotation.annotationType().getSimpleName())) {
-                        Map<String,String> serviceAnnotationMap = AnnotationUtil.getAnnotationDetail(annotation);
-                        if (!StringUtils.isEmpty(serviceAnnotationMap.get("usage"))) {
-                            usage0 = serviceAnnotationMap.get("usage");
-                        }
-                        if (!StringUtils.isEmpty(serviceAnnotationMap.get("value"))) {
-                            value = serviceAnnotationMap.get("value");
-                        }
-                        break;
-                    }
+            if (apidocService != null) {
+                if (!StringUtils.isEmpty(apidocService.usage())) {
+                    usage0 = apidocService.usage();
+                }
+                if (!StringUtils.isEmpty(apidocService.value())) {
+                    value = apidocService.value();
                 }
             }
             ServiceInfo serviceInfo = new ServiceInfo(value, service.getName(), usage0);
@@ -140,20 +134,15 @@ public class ApiDocScanner {
 
             Method[] methods = service.getMethods();
             for (Method m : methods) {
-                //解析Method
+                //解析Methods
+                ApidocInterface apidocInterface = m.getAnnotation(ApidocInterface.class);
                 String name = service.getName() + "." + m.getName();
                 String usage = usage0;
                 String desc = "";
-                Annotation[] interfaceAnnotations = m.getAnnotations();
-                if (interfaceAnnotations.length > 0) {
-                    for (Annotation annotation:interfaceAnnotations) {
-                        if ("ApidocInterface".equals(annotation.annotationType().getSimpleName())) {
-                            Map<String,String> interfaceAnnotationMap = AnnotationUtil.getAnnotationDetail(annotation);
-                            desc = interfaceAnnotationMap.get("value");
-                            if (!StringUtils.isEmpty(interfaceAnnotationMap.get("usage"))) {
-                                usage = interfaceAnnotationMap.get("usage");
-                            }
-                        }
+                if (apidocInterface != null) {
+                    desc = apidocInterface.value();
+                    if (!StringUtils.isEmpty(apidocInterface.usage())) {
+                        usage = apidocInterface.usage();
                     }
                 }
                 InterfaceInfo interfaceInfo = new InterfaceInfo(name,desc, usage, service.getName(), m.getName(),"","");
@@ -219,7 +208,4 @@ public class ApiDocScanner {
         }
         return new Class[0];
     }
-
-
-
 }
