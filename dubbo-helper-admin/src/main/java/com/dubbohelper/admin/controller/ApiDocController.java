@@ -111,7 +111,6 @@ public class ApiDocController implements InitializingBean {
 
     }
 
-
     @Override
     public void afterPropertiesSet() throws Exception {
 
