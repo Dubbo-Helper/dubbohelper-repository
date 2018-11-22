@@ -1,22 +1,18 @@
 package com.dubbohelper.admin.scanner;
 
+import com.dubbohelper.admin.dto.MavenCoordinateDTO;
 import com.dubbohelper.admin.scanner.elementInfo.ElementInfo;
-import com.dubbohelper.admin.util.FileUtil;
 import com.dubbohelper.common.annotations.ApidocInterface;
 import com.dubbohelper.common.annotations.ApidocService;
-import lombok.SneakyThrows;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,91 +21,32 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class ApiDocScanner {
-    private final Map<ServiceInfo, List<InterfaceInfo>> INTERFACE_CACHE = new ConcurrentHashMap<ServiceInfo, List<InterfaceInfo>>();
 
-    @SneakyThrows
-    public void downloadApiDoc(String fileName, OutputStream outputStream) {
-        FileUtil.createApiDocFile(INTERFACE_CACHE,fileName);
+    @Getter
+    private final static Map<String,Map<ServiceInfo, List<InterfaceInfo>>> APPLICATION_CACHE = new ConcurrentHashMap<>();
 
-        File file = new File(FileUtil.getFilePath(fileName));
-        if(!file.exists()){
-            throw new FileNotFoundException("文件不存在");
-        }
-        FileInputStream in = new FileInputStream(file);
-        byte[] buffer = new byte[1024];
-        int length = 0;
-        while ((length = in.read(buffer)) > 0){
-            outputStream.write(buffer,0,length);
-        }
-
-        FileUtil.deleteApiDocFile(fileName);
-    }
-
-    /**
-     * 服务列表
-     */
-    public List<ServiceInfo> listService() {
-        List<ServiceInfo> list = new ArrayList<ServiceInfo>(INTERFACE_CACHE.keySet());
-        Collections.sort(list);
-        return list;
-    }
-
-    /**
-     * 服务包含方法列表
-     * @param className 服务名
-     */
-    public List<InterfaceInfo> listInterface(String className) {
-        for (ServiceInfo serviceInfo : INTERFACE_CACHE.keySet()) {
-            if (serviceInfo.getClassName().equals(className)) {
-                List<InterfaceInfo> list = INTERFACE_CACHE.get(serviceInfo);
-                Collections.sort(list);
-                return list;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 方法详情
-     * @param className 服务名
-     * @param methodName 方法名
-     */
-    public InterfaceInfo interfaceDetail(String className, String methodName) {
-        for (ServiceInfo serviceInfo : INTERFACE_CACHE.keySet()) {
-            if (serviceInfo.getClassName().equals(className)) {
-                List<InterfaceInfo> interfaceInfoList = INTERFACE_CACHE.get(serviceInfo);
-                for (InterfaceInfo interfaceInfo : interfaceInfoList) {
-                    if (interfaceInfo.getMethodName().equals(methodName)) {
-                        return interfaceInfo;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    public synchronized void init(String...docScanPackages) {
+    public synchronized void loadApplication(MavenCoordinateDTO dto, String...docScanPackages) {
         if(docScanPackages == null || docScanPackages.length == 0){
             log.info("docScanPackages is null");
             return;
         }
 
-        Set<Class<?>> apiDocServices = new HashSet<Class<?>>();
         ClassScanner classScanner = new ClassScanner();
         for (String docScanPackage : docScanPackages){
-            apiDocServices.addAll(classScanner.getClasses(docScanPackage));
+            Set<Class<?>> apiDocServices = new HashSet<Class<?>>();
+            apiDocServices.addAll(classScanner.getClasses(dto,docScanPackage,"/Users/lijinbo/.m2/repository/"));
+            log.debug("scan @ApidocService size:{}", apiDocServices.size());
+            log.debug("scan @ApidocService {}", apiDocServices);
+            initService(apiDocServices,docScanPackage);
         }
-        log.debug("scan @ApidocService size:{}", apiDocServices.size());
-        log.debug("scan @ApidocService {}", apiDocServices);
-
-        initService(apiDocServices);
     }
 
     /**
      * 解析Service注解
      * @param apiDocServices 接口
      */
-    private void initService(Set<Class<?>> apiDocServices) {
+    private void initService(Set<Class<?>> apiDocServices,String packageName) {
+        Map<ServiceInfo, List<InterfaceInfo>> serviceCache = new HashMap<>();
         for (Class<?> service : apiDocServices) {
             if (!service.isInterface()) {
                 log.error("{} is not interface", service);
@@ -130,7 +67,7 @@ public class ApiDocScanner {
             }
             ServiceInfo serviceInfo = new ServiceInfo(value, service.getName(), usage0);
             List<InterfaceInfo> interfaceInfos = new ArrayList<InterfaceInfo>();
-            INTERFACE_CACHE.put(serviceInfo, interfaceInfos);
+            serviceCache.put(serviceInfo, interfaceInfos);
 
             Method[] methods = service.getMethods();
             for (Method m : methods) {
@@ -183,6 +120,7 @@ public class ApiDocScanner {
                 interfaceInfo.getResponse().addAll(responses);
             }
         }
+        APPLICATION_CACHE.put(packageName,serviceCache);
     }
 
     /**

@@ -5,8 +5,7 @@ import com.dubbohelper.admin.scanner.elementInfo.ElementInfo;
 import com.dubbohelper.admin.scanner.elementInfo.ListElementInfo;
 import com.dubbohelper.admin.scanner.elementInfo.ValueElementInfo;
 import com.dubbohelper.common.annotations.ApidocElement;
-import com.dubbohelper.common.enums.EnumIntegerCode;
-import com.dubbohelper.common.enums.EnumStringCode;
+import com.dubbohelper.common.enums.EnumToString;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
@@ -84,8 +83,7 @@ public class ParameterScanner {
             } else {
                 List<String> enums = new ArrayList<String>();
                 if (element != null && element.enumClass() != Enum.class) {
-                    if (EnumStringCode.class.isAssignableFrom(element.enumClass())
-                            || EnumIntegerCode.class.isAssignableFrom(element.enumClass())) {
+                    if (EnumToString.class.isAssignableFrom(element.enumClass())) {
                         enums = extractEnum(element.enumClass());
                     } else {
                         log.error("{}.{} @ApidocElement(enumClass) 设置的字典枚举无效", clazz.getName(), field.getName());
@@ -113,25 +111,12 @@ public class ParameterScanner {
     private List<String> extractEnum(Class<?> enumClass) {
 
         List<String> list = new ArrayList<String>();
-        Object[] values = enumClass.getEnumConstants();
-        Method getCodeMethod = null;
-        Method getDescMethod = null;
+        Method toString2 = null;
         try {
-            getCodeMethod = enumClass.getMethod("getCode");
-            getDescMethod = enumClass.getMethod("getDesc");
-        } catch (NoSuchMethodException e) {
+            toString2 = enumClass.getMethod("toString2");
+            list = (List<String>) toString2.invoke(enumClass.newInstance());
+        } catch (Exception e) {
             return list;
-        }
-        if (getCodeMethod != null && getDescMethod != null) {
-            for (Object val : values) {
-                try {
-                    Object code = getCodeMethod.invoke(val);
-                    Object desc = getDescMethod.invoke(val);
-                    list.add(code + ":" + desc);
-                } catch (Exception e) {
-                    log.error("解析枚举类失败:{}",enumClass.toString(),e);
-                }
-            }
         }
         return list;
     }
