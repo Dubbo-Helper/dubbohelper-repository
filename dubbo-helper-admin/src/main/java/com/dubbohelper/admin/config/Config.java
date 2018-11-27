@@ -15,4 +15,7 @@ public class Config {
 
     @Value("${dubbo.registry.address}")
     String dubboUrl;
+
+    @Value("${maven.repository.url}")
+    String mavenRepositoryUrl;
 }
