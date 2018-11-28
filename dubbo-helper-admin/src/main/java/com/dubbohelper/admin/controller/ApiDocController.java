@@ -9,6 +9,7 @@ import com.dubbohelper.admin.service.impl.ApiDocServiceImpl;
 import com.dubbohelper.admin.util.ModelUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
@@ -26,7 +27,8 @@ public class ApiDocController implements InitializingBean {
 
     private ApiDocScanner scanner = new ApiDocScanner();
 
-    private ApiDocService apiDocService = new ApiDocServiceImpl();
+    @Autowired
+    private ApiDocService apiDocService;
 
     @RequestMapping("")
     public ModelAndView listApplication() throws Exception{

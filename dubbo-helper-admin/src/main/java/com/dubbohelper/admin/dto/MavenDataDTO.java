@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * @Author Mr.zhang  2018-11-22 17:18
+ * @author Mr.zhang  2018-11-22 17:18
  */
 @Setter
 @Getter
@@ -20,5 +20,4 @@ public class MavenDataDTO {
     String value;
     String updated;
     String classifier;
-
 }

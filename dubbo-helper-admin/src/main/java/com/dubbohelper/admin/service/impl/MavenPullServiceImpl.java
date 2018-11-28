@@ -1,107 +1,103 @@
 package com.dubbohelper.admin.service.impl;
 
 import com.dubbohelper.admin.config.Config;
+import com.dubbohelper.admin.dto.MavenCoordinateDTO;
 import com.dubbohelper.admin.dto.MavenDataDTO;
 import com.dubbohelper.admin.service.MavenPullService;
 import com.dubbohelper.admin.util.HttpClient;
 import com.dubbohelper.admin.util.XMLBase;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 
 /**
- * @Author Mr.zhang  2018-11-26 16:33
+ * @author Mr.zhang  2018-11-26 16:33
  */
+@Slf4j
+@Service
 public class MavenPullServiceImpl implements MavenPullService {
+
     @Autowired
     private Config config;
-    @Override
-    public void pull(String groupId, String artifactId, String version) {
-        //获取仓库maven-metadata.xml 地址
-        String repositoryUrl = getMavenUrl(groupId, artifactId, version);
 
-        String s = "";
+    @Override
+    public void pullApiJar(MavenCoordinateDTO dto) {
+
+        //获取maven-metadata.xml 地址
+        StringBuilder repositoryUrl = new StringBuilder();
+        repositoryUrl.append(config.getMavenRepositoryUrl());
+        repositoryUrl.append(File.separator);
+        repositoryUrl.append(dto.getGroupId().replace(".",File.separator)).append(File.separator);
+        repositoryUrl.append(dto.getArtifactId()).append(File.separator);
+        repositoryUrl.append(dto.getVersion()).append(File.separator);
+        repositoryUrl.append("maven-metadata.xml");
+
+        //`
+        String xmlStream;
         try {
-            s = HttpClient.downLoadFromUrl(repositoryUrl);
+            xmlStream = HttpClient.downloadXmlFile(repositoryUrl.toString());
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("maven-metadata.xml文件下载失败:{}", dto.toString(), e);
+            return;
         }
 
         //解析 maven-metadata.xml
-        MavenDataDTO data = null;
+        MavenDataDTO mavenDataDTO;
         try {
-            data = (MavenDataDTO) XMLBase.xml2obj(MavenDataDTO.class, s);
+            mavenDataDTO = (MavenDataDTO) XMLBase.xml2obj(MavenDataDTO.class, xmlStream);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("maven-metadata.xml文件解析失败:{}", xmlStream, e);
+            return;
         }
 
-
         //下载jar包 保存文件
-        if (data != null) {
+        if (mavenDataDTO != null) {
             try {
-                StringBuffer fileName = new StringBuffer();
-                fileName.append(data.getArtifactId());
+                StringBuilder fileName = new StringBuilder();
+                fileName.append(mavenDataDTO.getArtifactId());
                 fileName.append("-");
-                fileName.append(data.getValue());
+                fileName.append(mavenDataDTO.getValue());
                 fileName.append(".");
-                fileName.append(data.getExtension());
+                fileName.append(mavenDataDTO.getExtension());
                 //下载地址
-                StringBuffer pullUrl = new StringBuffer();
+                StringBuilder pullUrl = new StringBuilder();
                 pullUrl.setLength(0);
                 pullUrl.append(config.getMavenRepositoryUrl());
                 pullUrl.append(File.separator);
-                pullUrl.append(data.getGroupId().replace(".",File.separator)).append(File.separator);
-                pullUrl.append(data.getArtifactId()).append(File.separator);
-                pullUrl.append(data.getVersion()).append(File.separator);
+                pullUrl.append(mavenDataDTO.getGroupId().replace(".",File.separator)).append(File.separator);
+                pullUrl.append(mavenDataDTO.getArtifactId()).append(File.separator);
+                pullUrl.append(mavenDataDTO.getVersion()).append(File.separator);
 
                 pullUrl.append(fileName);
 
-                String saveJARPath = saveJARPath(data);
+                String saveJARPath = saveJARPath(mavenDataDTO);
                 createFile(saveJARPath);
 
                 HttpClient.downLoadJARUrl(pullUrl.toString(),fileName.toString(),saveJARPath);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                log.error("jar包下载失败:{}", dto.toString(), e);
             }
         }
-    }
-
-    /***
-     * 获取Maven仓库地址
-     * @param groupId
-     * @param artifactId
-     * @param version
-     * @return
-     */
-    private String getMavenUrl(String groupId, String artifactId, String version) {
-        StringBuffer sb = new StringBuffer();
-        sb.append(config.getMavenRepositoryUrl());
-        sb.append(File.separator);
-        sb.append(groupId.replace(".",File.separator)).append(File.separator);
-        sb.append(artifactId).append(File.separator);
-        sb.append(version).append(File.separator);
-        sb.append("maven-metadata.xml");
-        return sb.toString();
     }
 
 
     /***
      * 拼装jar包下载
-     * @param data
+     * @param dto
      * @return
      */
-    public static String saveJARPath(MavenDataDTO data){
+    public static String saveJARPath(MavenDataDTO dto){
         StringBuffer sb = new StringBuffer();
         sb.append(System.getProperties().getProperty("user.home")).append(File.separator);
         sb.append(".dubbohelper").append(File.separator);
         sb.append("jars").append(File.separator);
-        sb.append(data.getGroupId().replace(".", File.separator));
-        sb.append(data.getArtifactId()).append(File.separator);
-        sb.append(data.getVersion()).append(File.separator);
+        sb.append(dto.getGroupId().replace(".", File.separator));
+        sb.append(dto.getArtifactId()).append(File.separator);
+        sb.append(dto.getVersion()).append(File.separator);
         return sb.toString();
 
     }

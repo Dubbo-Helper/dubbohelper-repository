@@ -1,11 +1,15 @@
 package com.dubbohelper.admin.service.impl;
 
+import com.dubbohelper.admin.dto.MavenCoordinateDTO;
 import com.dubbohelper.admin.scanner.ApiDocScanner;
 import com.dubbohelper.admin.scanner.InterfaceInfo;
 import com.dubbohelper.admin.scanner.ServiceInfo;
 import com.dubbohelper.admin.service.ApiDocService;
+import com.dubbohelper.admin.service.MavenPullService;
 import com.dubbohelper.admin.util.FileUtil;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,7 +23,17 @@ import java.util.List;
  * @author lijinbo
  * @since 1.0.0
  */
+@Service
 public class ApiDocServiceImpl implements ApiDocService {
+
+    @Autowired
+    private MavenPullService mavenPullService;
+
+    @Override
+    public void loadApplication(MavenCoordinateDTO dto) {
+        mavenPullService.pullApiJar(dto);
+
+    }
 
     @Override
     public List<String> listApplication() {
