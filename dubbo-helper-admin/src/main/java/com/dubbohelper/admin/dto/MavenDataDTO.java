@@ -24,7 +24,7 @@ public class MavenDataDTO {
     /**
      * 远程maven仓库的URL地址，默认使用bw30的远程maven-public库
      */
-    private String repository = "http://maven.zhubajie.la/repository/public/";
+    private String repository = "";
     /**
      * 下载的jar包存放的目标地址，默认为./target/repo
      */

@@ -17,7 +17,6 @@ public class FileUtil {
 
     private static final String CLASS_PATH = FileUtil.class.getResource("/").getPath();
 
-
     public static String getFilePath(FileTypeEnum fileType, String fileName) {
 
         return CLASS_PATH + fileType.getPath() +fileName + fileType.getSuffix();

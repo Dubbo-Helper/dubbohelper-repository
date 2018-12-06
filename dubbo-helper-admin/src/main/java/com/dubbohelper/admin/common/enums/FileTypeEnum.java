@@ -8,7 +8,7 @@ public enum FileTypeEnum {
     /**
      * 文本文件类型
      */
-    APPLICATIONS("/applications/", ".txt","项目信息记录文档");
+    APPLICATIONS("/applications/", ".txt","jar包信息记录文档");
 
     private String path;
 
