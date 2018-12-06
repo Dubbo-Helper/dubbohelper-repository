@@ -1,4 +1,4 @@
-package com.dubbohelper.admin.util;
+package com.dubbohelper.admin.common.util;
 
 import com.dubbohelper.admin.scanner.InterfaceInfo;
 import com.dubbohelper.admin.scanner.ServiceInfo;

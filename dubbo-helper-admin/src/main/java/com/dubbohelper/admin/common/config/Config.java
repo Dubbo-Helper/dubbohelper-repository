@@ -1,4 +1,4 @@
-package com.dubbohelper.admin.config;
+package com.dubbohelper.admin.common.config;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component;
 public class Config {
 
     @Value("${dubbo.registry.address}")
-    String dubboUrl;
+    private String dubboUrl;
 
     @Value("${maven.repository.url}")
-    String mavenRepositoryUrl;
+    private String mavenRepositoryUrl;
 }

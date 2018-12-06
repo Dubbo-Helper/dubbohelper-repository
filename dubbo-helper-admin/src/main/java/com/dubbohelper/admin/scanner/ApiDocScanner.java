@@ -1,6 +1,5 @@
 package com.dubbohelper.admin.scanner;
 
-import com.dubbohelper.admin.dto.MavenCoordinateDTO;
 import com.dubbohelper.admin.scanner.elementInfo.ElementInfo;
 import com.dubbohelper.common.annotations.ApidocInterface;
 import com.dubbohelper.common.annotations.ApidocService;
@@ -23,47 +22,44 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ApiDocScanner {
 
     @Getter
-    private final static Map<String,Map<ServiceInfo, List<InterfaceInfo>>> APPLICATION_CACHE = new ConcurrentHashMap<>();
+    private final static Map<String, Map<ServiceInfo, List<InterfaceInfo>>> APPLICATION_CACHE = new ConcurrentHashMap<>();
 
-    public synchronized void loadApplication(MavenCoordinateDTO dto, String...docScanPackages) {
-        if(docScanPackages == null || docScanPackages.length == 0){
+    public synchronized void loadApplication(String jarName, String jarPath, String... docScanPackages) {
+        if (docScanPackages == null || docScanPackages.length == 0) {
             log.info("docScanPackages is null");
             return;
         }
 
         ClassScanner classScanner = new ClassScanner();
-        for (String docScanPackage : docScanPackages){
-            Set<Class<?>> apiDocServices = new HashSet<Class<?>>();
-            apiDocServices.addAll(classScanner.getClasses(dto,docScanPackage,"/Users/lijinbo/.m2/repository/"));
+        for (String docScanPackage : docScanPackages) {
+            Set<Class<?>> apiDocServices = new HashSet<Class<?>>(classScanner.getClasses(jarPath, docScanPackage));
             log.debug("scan @ApidocService size:{}", apiDocServices.size());
             log.debug("scan @ApidocService {}", apiDocServices);
-            initService(apiDocServices,docScanPackage);
+            initService(apiDocServices, jarName);
         }
     }
 
     /**
      * 解析Service注解
+     *
      * @param apiDocServices 接口
      */
-    private void initService(Set<Class<?>> apiDocServices,String packageName) {
+    private void initService(Set<Class<?>> apiDocServices, String jarName) {
         Map<ServiceInfo, List<InterfaceInfo>> serviceCache = new HashMap<>();
-        for (Class<?> service : apiDocServices) {
-            if (!service.isInterface()) {
-                log.error("{} is not interface", service);
-                continue;
-            }
+        if (APPLICATION_CACHE.containsKey(jarName)) {
+            serviceCache = APPLICATION_CACHE.get(jarName);
+        }
 
+        for (Class<?> service : apiDocServices) {
             //解析Service
             ApidocService apidocService = service.getAnnotation(ApidocService.class);
-            String usage0 = "";
             String value = "";
-            if (apidocService != null) {
-                if (!StringUtils.isEmpty(apidocService.usage())) {
-                    usage0 = apidocService.usage();
-                }
-                if (!StringUtils.isEmpty(apidocService.value())) {
-                    value = apidocService.value();
-                }
+            String usage0 = "";
+            if (!StringUtils.isEmpty(apidocService.value())) {
+                value = apidocService.value();
+            }
+            if (!StringUtils.isEmpty(apidocService.usage())) {
+                usage0 = apidocService.usage();
             }
             ServiceInfo serviceInfo = new ServiceInfo(value, service.getName(), usage0);
             List<InterfaceInfo> interfaceInfos = new ArrayList<InterfaceInfo>();
@@ -73,16 +69,20 @@ public class ApiDocScanner {
             for (Method m : methods) {
                 //解析Methods
                 ApidocInterface apidocInterface = m.getAnnotation(ApidocInterface.class);
-                String name = service.getName() + "." + m.getName();
-                String usage = usage0;
-                String desc = "";
-                if (apidocInterface != null) {
-                    desc = apidocInterface.value();
-                    if (!StringUtils.isEmpty(apidocInterface.usage())) {
-                        usage = apidocInterface.usage();
-                    }
+                if (apidocInterface == null) {
+                    log.info("{} is not use @ApiDocInterface", m);
+                    continue;
                 }
-                InterfaceInfo interfaceInfo = new InterfaceInfo(name,desc, usage, service.getName(), m.getName(),"","");
+                String name = service.getName() + "." + m.getName();
+                String desc = "";
+                String usage = usage0;
+                if (!StringUtils.isEmpty(apidocInterface.value())) {
+                    desc = apidocInterface.value();
+                }
+                if (!StringUtils.isEmpty(apidocInterface.usage())) {
+                    usage = apidocInterface.usage();
+                }
+                InterfaceInfo interfaceInfo = new InterfaceInfo(name, desc, usage, service.getName(), m.getName(), "", "");
                 interfaceInfos.add(interfaceInfo);
 
                 //解析Request、Response
@@ -93,7 +93,7 @@ public class ApiDocScanner {
                         interfaceInfo.setRequestName(requestClazz.getName());
                     } else {
                         log.error("{}.{} 存在过多参数,只允许单一参数", service.getName(), m.getName());
-                        break;
+                        continue;
                     }
                 }
                 Class returnClazz = m.getReturnType();
@@ -105,7 +105,7 @@ public class ApiDocScanner {
                     Class[] classes = extractInterfaceMethodReturn(m);
                     if (classes.length != 1) {
                         log.error("{}.{} 返回值泛型信息不为一个", service.getName(), m.getName());
-                        break;
+                        continue;
                     }
                     returnClazz = classes[0];
                     interfaceInfo.setResponseName(returnClazz.getName());
@@ -120,7 +120,7 @@ public class ApiDocScanner {
                 interfaceInfo.getResponse().addAll(responses);
             }
         }
-        APPLICATION_CACHE.put(packageName,serviceCache);
+        APPLICATION_CACHE.put(jarName, serviceCache);
     }
 
     /**
@@ -129,7 +129,7 @@ public class ApiDocScanner {
      * @param method 方法
      * @return 泛型数组
      */
-    private static Class[] extractInterfaceMethodReturn(Method method){
+    private static Class[] extractInterfaceMethodReturn(Method method) {
         Type type = method.getGenericReturnType();
         //检查泛型
         if (type instanceof ParameterizedType) {

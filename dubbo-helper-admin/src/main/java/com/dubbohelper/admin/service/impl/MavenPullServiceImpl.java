@@ -1,11 +1,10 @@
 package com.dubbohelper.admin.service.impl;
 
-import com.dubbohelper.admin.config.Config;
-import com.dubbohelper.admin.dto.MavenCoordinateDTO;
+import com.dubbohelper.admin.common.config.Config;
 import com.dubbohelper.admin.dto.MavenDataDTO;
 import com.dubbohelper.admin.service.MavenPullService;
-import com.dubbohelper.admin.util.HttpClient;
-import com.dubbohelper.admin.util.XMLBase;
+import com.dubbohelper.admin.common.util.HttpClient;
+import com.dubbohelper.admin.common.util.XMLBase;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,7 @@ public class MavenPullServiceImpl implements MavenPullService {
     private Config config;
 
     @Override
-    public void pullApiJar(MavenCoordinateDTO dto) {
+    public void pullApiJar(MavenDataDTO dto) {
 
         //获取maven-metadata.xml 地址
         StringBuilder repositoryUrl = new StringBuilder();

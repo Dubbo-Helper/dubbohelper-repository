@@ -1,20 +1,25 @@
 package com.dubbohelper.admin.service.impl;
 
-import com.dubbohelper.admin.dto.MavenCoordinateDTO;
+import com.dubbohelper.admin.common.enums.FileTypeEnum;
 import com.dubbohelper.admin.scanner.ApiDocScanner;
 import com.dubbohelper.admin.scanner.InterfaceInfo;
 import com.dubbohelper.admin.scanner.ServiceInfo;
 import com.dubbohelper.admin.service.ApiDocService;
-import com.dubbohelper.admin.service.MavenPullService;
-import com.dubbohelper.admin.util.FileUtil;
+import com.dubbohelper.admin.common.util.FileUtil;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.Velocity;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,15 +30,6 @@ import java.util.List;
  */
 @Service
 public class ApiDocServiceImpl implements ApiDocService {
-
-    @Autowired
-    private MavenPullService mavenPullService;
-
-    @Override
-    public void loadApplication(MavenCoordinateDTO dto) {
-        mavenPullService.pullApiJar(dto);
-
-    }
 
     @Override
     public List<String> listApplication() {
@@ -79,9 +75,25 @@ public class ApiDocServiceImpl implements ApiDocService {
     @SneakyThrows
     @Override
     public void downloadApiDoc(String packageName, String fileName, OutputStream outputStream) {
-        FileUtil.createApiDocFile(ApiDocScanner.getAPPLICATION_CACHE().get(packageName),fileName);
+        // 设置Velocity变量
+        VelocityContext ctx = new VelocityContext();
+        ctx.put("mapKey", fileName);
+        ctx.put("serviceList",ApiDocScanner.getAPPLICATION_CACHE().get(packageName));
+        // 初始化Velocity模板引擎
+        VelocityEngine ve = new VelocityEngine();
+        ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
+        ve.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
+        ve.setProperty(Velocity.INPUT_ENCODING, "UTF-8");
+        ve.setProperty(Velocity.OUTPUT_ENCODING, "UTF-8");
+        ve.init();
+        // 获取Velocity模板文件
+        Template template = ve.getTemplate("apiDoc.md.vm");
+        // 输出
+        StringWriter sw = new StringWriter();
+        template.merge(ctx,sw);
+        FileUtil.createFile(FileTypeEnum.API_DOC, fileName, sw.toString());
 
-        File file = new File(FileUtil.getFilePath(fileName));
+        File file = new File(FileUtil.getFilePath(FileTypeEnum.API_DOC, fileName));
         if(!file.exists()){
             throw new FileNotFoundException("文件不存在");
         }
@@ -92,6 +104,6 @@ public class ApiDocServiceImpl implements ApiDocService {
             outputStream.write(buffer,0,length);
         }
 
-        FileUtil.deleteApiDocFile(fileName);
+        FileUtil.deleteFile(FileTypeEnum.API_DOC, fileName);
     }
 }

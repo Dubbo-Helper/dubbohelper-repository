@@ -1,6 +1,5 @@
 package com.dubbohelper.admin.service;
 
-import com.dubbohelper.admin.dto.MavenCoordinateDTO;
 import com.dubbohelper.admin.scanner.InterfaceInfo;
 import com.dubbohelper.admin.scanner.ServiceInfo;
 
@@ -14,12 +13,6 @@ import java.util.List;
  * @since 1.0.0
  */
 public interface ApiDocService {
-
-    /**
-     * 加载api包
-     * @param dto jar包maven坐标
-     */
-    void loadApplication(MavenCoordinateDTO dto);
 
     /**
      * 获取应用列表

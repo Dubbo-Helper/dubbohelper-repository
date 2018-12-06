@@ -10,14 +10,23 @@ import lombok.Setter;
 @Getter
 public class MavenDataDTO {
 
-    String groupId;
-    String artifactId;
-    String version;
-    String timestamp;
-    String buildNumber;
-    String lastUpdated;
-    String extension;
-    String value;
-    String updated;
-    String classifier;
+    private String groupId;
+
+    private String artifactId;
+
+    private String version;
+
+    private String timestamp;
+
+    private String buildNumber;
+
+    private String lastUpdated;
+
+    private String extension;
+
+    private String value;
+
+    private String updated;
+
+    private String classifier;
 }

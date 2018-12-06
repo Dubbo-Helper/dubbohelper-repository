@@ -1,6 +1,6 @@
 package com.dubbohelper.admin.service.sync;
 
-import com.dubbohelper.admin.config.Config;
+import com.dubbohelper.admin.common.config.Config;
 import com.dubbohelper.admin.dto.Application;
 import com.dubbohelper.admin.dto.Constants;
 import com.dubbohelper.admin.dto.URL;
@@ -19,11 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -74,7 +69,6 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
                 .connectionTimeoutMs(10000)
                 .build();
         client.start();
-
 
 
         //初始化应用列表
@@ -242,7 +236,7 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
     }
 
     @Override
-    public void destroy()  {
+    public void destroy() {
         cache.close();
         client.close();
     }
