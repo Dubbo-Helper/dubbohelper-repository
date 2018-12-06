@@ -111,6 +111,14 @@ public class ApiDocController implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
 
+        String[] docScanPackage = {"com.dubbohelper.test.api.service"};
+        String jarName = "java-dubbohelper-test-api-1.1.0";
+        String jarPath = "/Users/lijinbo/.m2/repository/com/dubbohelper/test/api/java-dubbohelper-test-api/1.1.0/java-dubbohelper-test-api-1.1.0.jar";
+        scanner.loadApplication(jarName, jarPath, docScanPackage);
 
+        String[] docScanPackage1 = {"com.dubbohelper.test2.api.service"};
+        String jarName1 = "java-dubbohelper-test2-api-1.12.0-SNAPSHOT";
+        String jarPath1 = "/Users/lijinbo/.m2/repository/com/dubbohelper/test2/api/java-dubbohelper-test2-api/1.12.0-SNAPSHOT/java-dubbohelper-test2-api-1.12.0-SNAPSHOT.jar";
+        scanner.loadApplication(jarName1, jarPath1, docScanPackage1);
     }
 }
