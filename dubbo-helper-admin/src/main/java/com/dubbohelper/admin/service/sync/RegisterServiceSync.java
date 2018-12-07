@@ -39,16 +39,7 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
 
     private static CuratorFramework client;
 
-
     private static TreeCache cache;
-
-
-    /**
-     * 用户收藏列表
-     * key:ip
-     * value:应用名列表
-     */
-    public Map<String, List<String>> collectApplications = new HashMap<>();
 
     /**
      * 应用列表
@@ -60,16 +51,23 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-
-        RetryPolicy retryPolicy = new ExponentialBackoffRetry(10000, 3);
-        client = CuratorFrameworkFactory.builder()
-                .connectString(config.getDubboUrl())
-                .retryPolicy(retryPolicy)
-                .sessionTimeoutMs(10000)
-                .connectionTimeoutMs(10000)
-                .build();
-        client.start();
-
+        if (StringUtils.isEmpty(config.getDubboUrl())) {
+            log.warn("未设置zk链接地址");
+            return;
+        }
+        try {
+            RetryPolicy retryPolicy = new ExponentialBackoffRetry(10000, 3);
+            client = CuratorFrameworkFactory.builder()
+                    .connectString(config.getDubboUrl())
+                    .retryPolicy(retryPolicy)
+                    .sessionTimeoutMs(10000)
+                    .connectionTimeoutMs(10000)
+                    .build();
+            client.start();
+        } catch (Exception e) {
+            log.error("zk连接失败 ", e);
+            return;
+        }
 
         //初始化应用列表
         List<String> serviceList = client.getChildren().forPath(Constants.DUBBO_PATH);
@@ -107,6 +105,7 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
                 registryApplicationMap.put(applicationName, application);
             }
         }
+        listener();
 
     }
 
@@ -246,6 +245,7 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
         for (String str : strs) {
             if (StringUtils.isEmpty(str)) {
                 b = true;
+                return true;
             }
         }
         return b;

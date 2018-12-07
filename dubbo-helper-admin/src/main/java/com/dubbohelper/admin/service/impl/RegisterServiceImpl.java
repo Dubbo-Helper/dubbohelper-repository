@@ -22,30 +22,20 @@ public class RegisterServiceImpl implements RegisterService {
     private RegisterServiceSync registerServiceSync;
 
     @Override
-    public List<String> myCollect(String ip) {
-        List<String> rst = new ArrayList<>();
-        rst.addAll(registerServiceSync.collectApplications.get(ip));
-        if(rst.size() == 0){
-            //TODO 从cookie中读取
-        }
-        return rst;
-    }
-
-    @Override
     public List<Application> search(String keyWord) {
         List<Application> list = new ArrayList<>();
         if (StringUtils.isEmpty(keyWord)) {//全量搜索只展示前10条
             int i = 0;
             for (Map.Entry<String, Application> entry : registerServiceSync.registryApplicationMap.entrySet()) {
                 if (i < 10) {
-                        Application app1 = entry.getValue();
-                        Application app = Application.builder()
-                                .application(app1.getApplication())
-                                .groupId(app1.getGroupId())
-                                .artifactId(app1.getArtifactId())
-                                .owner(app1.getOwner())
-                                .build();
-                        list.add(app);
+                    Application app1 = entry.getValue();
+                    Application app = Application.builder()
+                            .application(app1.getApplication())
+                            .groupId(app1.getGroupId())
+                            .artifactId(app1.getArtifactId())
+                            .owner(app1.getOwner())
+                            .build();
+                    list.add(app);
                 }
                 i++;
             }
@@ -53,29 +43,18 @@ public class RegisterServiceImpl implements RegisterService {
         }
         for (Map.Entry<String, Application> entry : registerServiceSync.registryApplicationMap.entrySet()) {
             String appName = entry.getKey();
-            if(appName.contains(keyWord)){
+            if (appName.contains(keyWord)) {
                 Application app1 = entry.getValue();
                 Application app = Application.builder()
-                                .application(app1.getApplication())
-                                .groupId(app1.getGroupId())
-                                .artifactId(app1.getArtifactId())
-                                .owner(app1.getOwner())
-                                .build();
-                        list.add(app);
+                        .application(app1.getApplication())
+                        .groupId(app1.getGroupId())
+                        .artifactId(app1.getArtifactId())
+                        .owner(app1.getOwner())
+                        .build();
+                list.add(app);
             }
         }
         return list;
     }
 
-    @Override
-    public void mark(String ip, String applicationName) {
-        List<String> list = registerServiceSync.collectApplications.get(ip);
-        if (null == list) {
-            List<String> apps = new ArrayList<>();
-            apps.add(applicationName);
-            registerServiceSync.collectApplications.put(ip, apps);
-        } else {
-            list.add(applicationName);
-        }
-    }
 }
