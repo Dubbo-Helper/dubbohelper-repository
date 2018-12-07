@@ -1,12 +1,15 @@
 package com.dubbohelper.admin.scanner;
 
+import com.dubbohelper.admin.common.enums.FilePathEnum;
+import com.dubbohelper.admin.dto.MavenCoordDTO;
 import com.dubbohelper.admin.scanner.elementInfo.ElementInfo;
 import com.dubbohelper.common.annotations.ApidocInterface;
 import com.dubbohelper.common.annotations.ApidocService;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -19,12 +22,26 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
+@Component
 public class ApiDocScanner {
 
-    @Getter
-    private final static Map<String, Map<ServiceInfo, List<InterfaceInfo>>> APPLICATION_CACHE = new ConcurrentHashMap<>();
+    private final static Map<String, Map<ServiceInfo, List<InterfaceInfo>>> JAR_ANNOTATION_CACHE = new ConcurrentHashMap<>();
 
-    public synchronized void loadApplication(String jarName, String jarPath, String... docScanPackages) {
+    public Map<ServiceInfo, List<InterfaceInfo>> getJarAnnotation(MavenCoordDTO dto) {
+        String key = dto.getGroupId() + "." + dto.getArtifactId() + "." + dto.getVersion();
+        if (!JAR_ANNOTATION_CACHE.containsKey(key)) {
+            String jarPath =  FilePathEnum.JARPATH.getPath();
+            jarPath = jarPath + dto.getGroupId().replace(".", File.separator) + File.separator
+                    + dto.getArtifactId() + File.separator + dto.getVersion() + File.separator
+                    + dto.getArtifactId() + "-" + dto.getVersion() + ".jar";
+            loadJar(key, jarPath, new String[]{dto.getGroupId()});
+        }
+
+
+        return JAR_ANNOTATION_CACHE.get(key);
+    }
+
+    public synchronized void loadJar(String jarName, String jarPath, String... docScanPackages) {
         if (docScanPackages == null || docScanPackages.length == 0) {
             log.info("docScanPackages is null");
             return;
@@ -46,8 +63,8 @@ public class ApiDocScanner {
      */
     private void initService(Set<Class<?>> apiDocServices, String jarName) {
         Map<ServiceInfo, List<InterfaceInfo>> serviceCache = new HashMap<>();
-        if (APPLICATION_CACHE.containsKey(jarName)) {
-            serviceCache = APPLICATION_CACHE.get(jarName);
+        if (JAR_ANNOTATION_CACHE.containsKey(jarName)) {
+            serviceCache = JAR_ANNOTATION_CACHE.get(jarName);
         }
 
         for (Class<?> service : apiDocServices) {
@@ -120,7 +137,7 @@ public class ApiDocScanner {
                 interfaceInfo.getResponse().addAll(responses);
             }
         }
-        APPLICATION_CACHE.put(jarName, serviceCache);
+        JAR_ANNOTATION_CACHE.put(jarName, serviceCache);
     }
 
     /**
@@ -145,5 +162,27 @@ public class ApiDocScanner {
             return classes;
         }
         return new Class[0];
+    }
+
+    public static void main(String[] args) {
+
+        ApiDocScanner scanner = new ApiDocScanner();
+        MavenCoordDTO dto = new MavenCoordDTO();
+        dto.setGroupId("com.dubbohelper.test.api");
+        dto.setArtifactId("java-dubbohelper-test-api");
+        dto.setVersion("1.1.0");
+        scanner.getJarAnnotation(dto);
+
+        MavenCoordDTO dto1 = new MavenCoordDTO();
+        dto1.setGroupId("com.dubbohelper.test2.api");
+        dto1.setArtifactId("java-dubbohelper-test2-api");
+        dto1.setVersion("1.12.0-SNAPSHOT");
+        scanner.getJarAnnotation(dto1);
+
+        MavenCoordDTO dto2 = new MavenCoordDTO();
+        dto2.setGroupId("com.dubbohelper.test.api");
+        dto2.setArtifactId("java-dubbohelper-test-api");
+        dto2.setVersion("1.1.0");
+        scanner.getJarAnnotation(dto2);
     }
 }

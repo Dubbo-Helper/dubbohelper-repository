@@ -1,5 +1,6 @@
 package com.dubbohelper.admin.dto;
 
+import com.dubbohelper.admin.common.enums.FilePathEnum;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +10,7 @@ import lombok.Setter;
 @Setter
 @Getter
 public class MavenDataDTO {
+
     /**
      * jar包在maven仓库中的groupId
      */
@@ -28,7 +30,7 @@ public class MavenDataDTO {
     /**
      * 下载的jar包存放的目标地址，默认为./target/repo
      */
-    private String target = "temp";
+    private String target = FilePathEnum.JARPATH.getPath();
     /**
      * 登录远程maven仓库的用户名，若远程仓库不需要权限，设为null，默认为null
      */
@@ -43,32 +45,9 @@ public class MavenDataDTO {
         super();
     }
 
-
-    public MavenDataDTO(String groupId, String artifactId) {
-        super();
-        this.groupId = groupId;
-        this.artifactId = artifactId;
-    }
-
-    public MavenDataDTO(String groupId, String artifactId, String version,
-                        String repository, /*String target,*/ String username, String password) {
-        super();
-        this.groupId = groupId;
-        this.artifactId = artifactId;
-        this.version = version;
-        this.repository = repository;
-        /*this.target = target;*/
-        this.username = username;
-        this.password = password;
-    }
-
-    public MavenDataDTO(String groupId, String artifactId, String version,
-                        String username, String password) {
-        super();
-        this.groupId = groupId;
-        this.artifactId = artifactId;
-        this.version = version;
-        this.username = username;
-        this.password = password;
+    public MavenDataDTO(MavenCoordDTO dto) {
+        this.groupId = dto.getGroupId();
+        this.artifactId = dto.getArtifactId();
+        this.version = dto.getVersion();
     }
 }

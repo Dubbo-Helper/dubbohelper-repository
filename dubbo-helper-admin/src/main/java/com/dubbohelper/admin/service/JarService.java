@@ -1,27 +1,33 @@
 package com.dubbohelper.admin.service;
 
+import com.dubbohelper.admin.dto.MavenCoordDTO;
+
+import java.util.List;
+
 public interface JarService {
 
     /**
      * 搜索项目
-     * @param artifactId
+     *
+     * @param artifactId artifactId
+     * @return 项目列表
      */
-    void searchApplication(String artifactId);
+    List<MavenCoordDTO> searchApplication(String artifactId);
 
     /**
      * 搜索jar包列表
-     * @param groupId
-     * @param artifactId
+     *
+     * @param groupId groupId
+     * @param artifactId artifactId
+     * @return jar包列表
      */
-    void getJars(String groupId, String artifactId);
+    List<MavenCoordDTO> getJars(String groupId, String artifactId);
 
     /**
-     * 添加jar包
-     * @param groupId
-     * @param artifactId
-     * @param version
-     * @param scanPackages
-     * @return
+     * 添加或更新jar包
+     *
+     * @param dto jar maven坐标信息
+     * @return 处理结果
      */
-    boolean insertJar(String groupId, String artifactId, String version, String scanPackages);
+    boolean insertOrUpdateJar(MavenCoordDTO dto);
 }

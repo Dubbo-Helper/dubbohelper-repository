@@ -1,5 +1,6 @@
 package com.dubbohelper.admin.controller;
 
+import com.dubbohelper.admin.dto.MavenCoordDTO;
 import com.dubbohelper.admin.scanner.ApiDocScanner;
 import com.dubbohelper.admin.scanner.InterfaceInfo;
 import com.dubbohelper.admin.scanner.ServiceInfo;
@@ -29,23 +30,13 @@ public class ApiDocController implements InitializingBean {
     @Autowired
     private ApiDocService apiDocService;
 
-    @RequestMapping("")
-    public ModelAndView listApplication() throws Exception {
-        List<String> applicationList = apiDocService.listApplication();
-
-        ModelAndView modelAndView = new ModelAndView("index");
-        modelAndView.addObject("applicationList", applicationList);
-
-        return modelAndView;
-    }
-
     @RequestMapping("/service")
-    public ModelAndView listServices(String packageName) throws Exception {
-        List<ServiceInfo> serviceList = apiDocService.listService(packageName);
+    public ModelAndView listServices(MavenCoordDTO dto) throws Exception {
+        List<ServiceInfo> serviceList = apiDocService.listService(dto);
 
         new Gson().toJson(serviceList);
         ModelAndView modelAndView = new ModelAndView("apiDoc");
-        modelAndView.addObject("packageName", packageName);
+        modelAndView.addObject("packageName", dto.getArtifactId());
         InterfaceInfo currentInterfaceInfo = new InterfaceInfo();
         ModelUtil.getModel(modelAndView, serviceList, null, currentInterfaceInfo, null, null);
 
@@ -53,12 +44,12 @@ public class ApiDocController implements InitializingBean {
     }
 
     @RequestMapping("/method")
-    public ModelAndView listInterfaces(String packageName, String service) throws Exception {
-        List<ServiceInfo> serviceList = apiDocService.listService(packageName);
-        List<InterfaceInfo> interfaceList = apiDocService.listInterface(packageName, service);
+    public ModelAndView listInterfaces(MavenCoordDTO dto, String service) throws Exception {
+        List<ServiceInfo> serviceList = apiDocService.listService(dto);
+        List<InterfaceInfo> interfaceList = apiDocService.listInterface(dto, service);
 
         ModelAndView modelAndView = new ModelAndView("apiDoc");
-        modelAndView.addObject("packageName", packageName);
+        modelAndView.addObject("packageName", dto.getArtifactId());
         InterfaceInfo currentInterfaceInfo = new InterfaceInfo();
         currentInterfaceInfo.setClassName(service);
         ModelUtil.getModel(modelAndView, serviceList, interfaceList, currentInterfaceInfo, null, null);
@@ -67,21 +58,21 @@ public class ApiDocController implements InitializingBean {
     }
 
     @RequestMapping("/document")
-    public ModelAndView listInterface(String packageName, String service, String method) throws Exception {
+    public ModelAndView listInterface(MavenCoordDTO dto, String service, String method) throws Exception {
 
-        List<ServiceInfo> serviceList = apiDocService.listService(packageName);
-        List<InterfaceInfo> interfaceList = apiDocService.listInterface(packageName, service);
-        InterfaceInfo interfaceInfo = apiDocService.interfaceDetail(packageName, service, method);
+        List<ServiceInfo> serviceList = apiDocService.listService(dto);
+        List<InterfaceInfo> interfaceList = apiDocService.listInterface(dto, service);
+        InterfaceInfo interfaceInfo = apiDocService.interfaceDetail(dto, service, method);
 
         ModelAndView modelAndView = new ModelAndView("apiDoc");
-        modelAndView.addObject("packageName", packageName);
+        modelAndView.addObject("packageName", dto.getArtifactId());
         ModelUtil.getModel(modelAndView, serviceList, interfaceList, interfaceInfo, interfaceInfo.getRequest(), interfaceInfo.getResponse());
 
         return modelAndView;
     }
 
     @RequestMapping("downloadApiDoc")
-    public void downloadApiDoc(HttpServletResponse response, String packages) {
+    public void downloadApiDoc(HttpServletResponse response, MavenCoordDTO dto) {
         OutputStream outputStream = null;
         String projectName = "test";
         try {
@@ -89,7 +80,7 @@ public class ApiDocController implements InitializingBean {
             response.reset();
             response.setContentType("multipart/form-data");
             response.setHeader("Content-Disposition", "attachment;fileName=" + projectName + ".md");
-            apiDocService.downloadApiDoc(packages, projectName, outputStream);
+            apiDocService.downloadApiDoc(dto, projectName, outputStream);
         } catch (FileNotFoundException e) {
             log.error("文件[" + projectName + "]不存在", e);
             response.setStatus(404);
@@ -111,14 +102,16 @@ public class ApiDocController implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        String[] docScanPackage = {"com.dubbohelper.test.api.service"};
-        String jarName = "java-dubbohelper-test-api-1.1.0";
-        String jarPath = "/Users/lijinbo/.m2/repository/com/dubbohelper/test/api/java-dubbohelper-test-api/1.1.0/java-dubbohelper-test-api-1.1.0.jar";
-        scanner.loadApplication(jarName, jarPath, docScanPackage);
+        MavenCoordDTO dto = new MavenCoordDTO();
+        dto.setGroupId("com.dubbohelper.test.api");
+        dto.setArtifactId("java-dubbohelper-test-api");
+        dto.setVersion("1.0.0");
+        scanner.getJarAnnotation(dto);
 
-        String[] docScanPackage1 = {"com.dubbohelper.test2.api.service"};
-        String jarName1 = "java-dubbohelper-test2-api-1.12.0-SNAPSHOT";
-        String jarPath1 = "/Users/lijinbo/.m2/repository/com/dubbohelper/test2/api/java-dubbohelper-test2-api/1.12.0-SNAPSHOT/java-dubbohelper-test2-api-1.12.0-SNAPSHOT.jar";
-        scanner.loadApplication(jarName1, jarPath1, docScanPackage1);
+        MavenCoordDTO dto1 = new MavenCoordDTO();
+        dto1.setGroupId("com.dubbohelper.test2.api");
+        dto1.setArtifactId("java-dubbohelper-test2-api");
+        dto1.setVersion("1.12.0-SNAPSHOT");
+        scanner.getJarAnnotation(dto1);
     }
 }

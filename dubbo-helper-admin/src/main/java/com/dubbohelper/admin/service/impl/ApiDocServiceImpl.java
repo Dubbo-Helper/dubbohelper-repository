@@ -1,6 +1,6 @@
 package com.dubbohelper.admin.service.impl;
 
-import com.dubbohelper.admin.common.enums.FileTypeEnum;
+import com.dubbohelper.admin.dto.MavenCoordDTO;
 import com.dubbohelper.admin.scanner.ApiDocScanner;
 import com.dubbohelper.admin.scanner.InterfaceInfo;
 import com.dubbohelper.admin.scanner.ServiceInfo;
@@ -13,6 +13,7 @@ import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -31,25 +32,21 @@ import java.util.List;
 @Service
 public class ApiDocServiceImpl implements ApiDocService {
 
+    @Autowired
+    private ApiDocScanner scanner;
+
     @Override
-    public List<String> listApplication() {
-        List<String> list = new ArrayList<String>(ApiDocScanner.getAPPLICATION_CACHE().keySet());
+    public List<ServiceInfo> listService(MavenCoordDTO dto) {
+        List<ServiceInfo> list = new ArrayList<ServiceInfo>(scanner.getJarAnnotation(dto).keySet());
         Collections.sort(list);
         return list;
     }
 
     @Override
-    public List<ServiceInfo> listService(String packageName) {
-        List<ServiceInfo> list = new ArrayList<ServiceInfo>(ApiDocScanner.getAPPLICATION_CACHE().get(packageName).keySet());
-        Collections.sort(list);
-        return list;
-    }
-
-    @Override
-    public List<InterfaceInfo> listInterface(String packageName, String className) {
-        for (ServiceInfo serviceInfo : ApiDocScanner.getAPPLICATION_CACHE().get(packageName).keySet()) {
+    public List<InterfaceInfo> listInterface(MavenCoordDTO dto, String className) {
+        for (ServiceInfo serviceInfo : scanner.getJarAnnotation(dto).keySet()) {
             if (serviceInfo.getClassName().equals(className)) {
-                List<InterfaceInfo> list = ApiDocScanner.getAPPLICATION_CACHE().get(packageName).get(serviceInfo);
+                List<InterfaceInfo> list = scanner.getJarAnnotation(dto).get(serviceInfo);
                 Collections.sort(list);
                 return list;
             }
@@ -58,10 +55,10 @@ public class ApiDocServiceImpl implements ApiDocService {
     }
 
     @Override
-    public InterfaceInfo interfaceDetail(String packageName, String className, String methodName) {
-        for (ServiceInfo serviceInfo : ApiDocScanner.getAPPLICATION_CACHE().get(packageName).keySet()) {
+    public InterfaceInfo interfaceDetail(MavenCoordDTO dto, String className, String methodName) {
+        for (ServiceInfo serviceInfo : scanner.getJarAnnotation(dto).keySet()) {
             if (serviceInfo.getClassName().equals(className)) {
-                List<InterfaceInfo> interfaceInfoList = ApiDocScanner.getAPPLICATION_CACHE().get(packageName).get(serviceInfo);
+                List<InterfaceInfo> interfaceInfoList = scanner.getJarAnnotation(dto).get(serviceInfo);
                 for (InterfaceInfo interfaceInfo : interfaceInfoList) {
                     if (interfaceInfo.getMethodName().equals(methodName)) {
                         return interfaceInfo;
@@ -74,11 +71,11 @@ public class ApiDocServiceImpl implements ApiDocService {
 
     @SneakyThrows
     @Override
-    public void downloadApiDoc(String packageName, String fileName, OutputStream outputStream) {
+    public void downloadApiDoc(MavenCoordDTO dto, String fileName, OutputStream outputStream) {
         // 设置Velocity变量
         VelocityContext ctx = new VelocityContext();
         ctx.put("mapKey", fileName);
-        ctx.put("serviceList",ApiDocScanner.getAPPLICATION_CACHE().get(packageName));
+        ctx.put("serviceList",scanner.getJarAnnotation(dto));
         // 初始化Velocity模板引擎
         VelocityEngine ve = new VelocityEngine();
         ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
@@ -91,9 +88,11 @@ public class ApiDocServiceImpl implements ApiDocService {
         // 输出
         StringWriter sw = new StringWriter();
         template.merge(ctx,sw);
-        FileUtil.createFile(FileTypeEnum.API_DOC, fileName, sw.toString());
 
-        File file = new File(FileUtil.getFilePath(FileTypeEnum.API_DOC, fileName));
+        String filePath = FileUtil.CLASS_PATH + fileName + ".md";
+        FileUtil.createFile(filePath, sw.toString());
+
+        File file = new File(filePath);
         if(!file.exists()){
             throw new FileNotFoundException("文件不存在");
         }
@@ -104,6 +103,6 @@ public class ApiDocServiceImpl implements ApiDocService {
             outputStream.write(buffer,0,length);
         }
 
-        FileUtil.deleteFile(FileTypeEnum.API_DOC, fileName);
+        FileUtil.deleteFile(filePath);
     }
 }
