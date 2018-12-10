@@ -1,6 +1,7 @@
 package com.dubbohelper.admin.service.impl;
 
 import com.dubbohelper.admin.dto.Application;
+import com.dubbohelper.admin.dto.SearchAppResDTO;
 import com.dubbohelper.admin.service.RegisterService;
 import com.dubbohelper.admin.service.sync.RegisterServiceSync;
 import lombok.extern.slf4j.Slf4j;
@@ -22,38 +23,23 @@ public class RegisterServiceImpl implements RegisterService {
     private RegisterServiceSync registerServiceSync;
 
     @Override
-    public List<Application> search(String keyWord) {
-        List<Application> list = new ArrayList<>();
-        if (StringUtils.isEmpty(keyWord)) {//全量搜索只展示前10条
-            int i = 0;
+    public List<SearchAppResDTO> search(String keyWord) {
+        List<SearchAppResDTO> list = new ArrayList<>();
+        if (!StringUtils.isEmpty(keyWord)) {//全量搜索只展示前10条
             for (Map.Entry<String, Application> entry : registerServiceSync.registryApplicationMap.entrySet()) {
-                if (i < 10) {
-                    Application app1 = entry.getValue();
-                    Application app = Application.builder()
-                            .application(app1.getApplication())
-                            .groupId(app1.getGroupId())
-                            .artifactId(app1.getArtifactId())
-                            .owner(app1.getOwner())
+                String appName = entry.getKey();
+                if (appName.contains(keyWord)) {
+                    Application app = entry.getValue();
+                    SearchAppResDTO searchAppResDTO = SearchAppResDTO.builder()
+                            .appName(app.getApplication())
+                            .groupId(app.getGroupId())
+                            .artifactId(app.getArtifactId())
                             .build();
-                    list.add(app);
+                    list.add(searchAppResDTO);
                 }
-                i++;
-            }
-            return list;
-        }
-        for (Map.Entry<String, Application> entry : registerServiceSync.registryApplicationMap.entrySet()) {
-            String appName = entry.getKey();
-            if (appName.contains(keyWord)) {
-                Application app1 = entry.getValue();
-                Application app = Application.builder()
-                        .application(app1.getApplication())
-                        .groupId(app1.getGroupId())
-                        .artifactId(app1.getArtifactId())
-                        .owner(app1.getOwner())
-                        .build();
-                list.add(app);
             }
         }
+        //TODO  本地缓存jar包解析项目
         return list;
     }
 

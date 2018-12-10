@@ -20,10 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.net.URLDecoder;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -80,7 +78,7 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
 
                 String applicationName = url.getParameters().get(Constants.APPLICATION);
                 String groupId = url.getParameters().get(Constants.GROUP_ID);
-                String artifactId = url.getParameters().get(Constants.ARTIFACT);
+                String artifactId = url.getParameters().get(Constants.ARTIFACT_ID);
                 String versionStr = url.getParameters().get(Constants.VERSION);
                 if (StringUtils.isEmpty(versionStr)) {
                     versionStr = url.getParameters().get(Constants.APPLICATION_VERSION);
@@ -106,7 +104,6 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
             }
         }
         listener();
-
     }
 
     /**
@@ -155,7 +152,7 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
 
         String applicationName = url.getParameters().get(Constants.APPLICATION);
         String groupId = url.getParameters().get(Constants.GROUP_ID);
-        String artifactId = url.getParameters().get(Constants.ARTIFACT);
+        String artifactId = url.getParameters().get(Constants.ARTIFACT_ID);
         String versionStr = url.getParameters().get(Constants.VERSION);
         if (StringUtils.isEmpty(versionStr)) {
             versionStr = url.getParameters().get(Constants.APPLICATION_VERSION);
