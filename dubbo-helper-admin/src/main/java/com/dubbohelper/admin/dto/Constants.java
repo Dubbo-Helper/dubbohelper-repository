@@ -9,9 +9,9 @@ public class Constants {
 
     public static final String APPLICATION = "application";
 
-    public static final String GROUP_ID = "organization";
+    public static final String GROUP_ID = "groupId";
 
-    public static final String ARTIFACT = "architecture";
+    public static final String ARTIFACT_ID = "artifactId";
 
     public static final String VERSION = "revision";
 

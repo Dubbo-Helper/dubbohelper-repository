@@ -1,6 +1,7 @@
 package com.dubbohelper.admin.service;
 
 import com.dubbohelper.admin.dto.Application;
+import com.dubbohelper.admin.dto.SearchAppResDTO;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public interface RegisterService {
      * @param keyWord
      * @return
      */
-    List<Application> search(String keyWord);
+    List<SearchAppResDTO> search(String keyWord);
 
 
 }
