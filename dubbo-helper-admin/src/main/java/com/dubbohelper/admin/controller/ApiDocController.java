@@ -8,8 +8,8 @@ import com.dubbohelper.admin.service.ApiDocService;
 import com.dubbohelper.admin.common.util.ModelUtil;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
@@ -23,15 +23,15 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/apiDoc")
-public class ApiDocController implements InitializingBean {
-
-    private ApiDocScanner scanner = new ApiDocScanner();
-
+public class ApiDocController {
+    
+    @Autowired
+    private ApiDocScanner apiDocScanner;
     @Autowired
     private ApiDocService apiDocService;
 
     @RequestMapping("/service")
-    public ModelAndView listServices(MavenCoordDTO dto) throws Exception {
+    public ModelAndView listServices(@RequestBody MavenCoordDTO dto) throws Exception {
         List<ServiceInfo> serviceList = apiDocService.listService(dto);
 
         new Gson().toJson(serviceList);
@@ -44,7 +44,7 @@ public class ApiDocController implements InitializingBean {
     }
 
     @RequestMapping("/method")
-    public ModelAndView listInterfaces(MavenCoordDTO dto, String service) throws Exception {
+    public ModelAndView listInterfaces(@RequestBody MavenCoordDTO dto, String service) throws Exception {
         List<ServiceInfo> serviceList = apiDocService.listService(dto);
         List<InterfaceInfo> interfaceList = apiDocService.listInterface(dto, service);
 
@@ -58,7 +58,7 @@ public class ApiDocController implements InitializingBean {
     }
 
     @RequestMapping("/document")
-    public ModelAndView listInterface(MavenCoordDTO dto, String service, String method) throws Exception {
+    public ModelAndView listInterface(@RequestBody MavenCoordDTO dto, String service, String method) throws Exception {
 
         List<ServiceInfo> serviceList = apiDocService.listService(dto);
         List<InterfaceInfo> interfaceList = apiDocService.listInterface(dto, service);
@@ -97,21 +97,5 @@ public class ApiDocController implements InitializingBean {
                 e.printStackTrace();
             }
         }
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-
-        MavenCoordDTO dto = new MavenCoordDTO();
-        dto.setGroupId("com.dubbohelper.test.api");
-        dto.setArtifactId("java-dubbohelper-test-api");
-        dto.setVersion("1.0.0");
-        scanner.getJarAnnotation(dto);
-
-        MavenCoordDTO dto1 = new MavenCoordDTO();
-        dto1.setGroupId("com.dubbohelper.test2.api");
-        dto1.setArtifactId("java-dubbohelper-test2-api");
-        dto1.setVersion("1.12.0-SNAPSHOT");
-        scanner.getJarAnnotation(dto1);
     }
 }
