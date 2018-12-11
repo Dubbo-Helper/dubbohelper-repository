@@ -25,7 +25,7 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     public List<SearchAppResDTO> search(String keyWord) {
         List<SearchAppResDTO> list = new ArrayList<>();
-        if (!StringUtils.isEmpty(keyWord)) {//全量搜索只展示前10条
+        if (!StringUtils.isEmpty(keyWord)) {
             for (Map.Entry<String, Application> entry : registerServiceSync.registryApplicationMap.entrySet()) {
                 String appName = entry.getKey();
                 if (appName.contains(keyWord)) {
