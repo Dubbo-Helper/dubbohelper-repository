@@ -2,6 +2,7 @@ package com.dubbohelper.admin.controller;
 
 import com.dubbohelper.admin.dto.MavenCoordDTO;
 import com.dubbohelper.admin.service.JarService;
+import com.dubbohelper.admin.service.RegisterService;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -19,6 +20,8 @@ public class IndexController implements InitializingBean {
 
     @Autowired
     private JarService jarService;
+    @Autowired
+    private RegisterService registerService;
 
     @RequestMapping("/searchApplication")
     public String searchApplication(String artifactId) {

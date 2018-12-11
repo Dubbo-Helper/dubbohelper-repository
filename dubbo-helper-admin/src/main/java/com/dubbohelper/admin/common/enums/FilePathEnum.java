@@ -1,5 +1,8 @@
 package com.dubbohelper.admin.common.enums;
 
+import com.dubbohelper.admin.service.ConfigureService;
+import com.dubbohelper.admin.service.impl.ConfigureServiceImpl;
+
 public enum FilePathEnum {
     /**
      * 已加载jar列表文档
