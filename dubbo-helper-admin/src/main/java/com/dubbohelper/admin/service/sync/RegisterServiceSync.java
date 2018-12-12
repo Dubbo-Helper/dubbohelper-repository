@@ -3,7 +3,6 @@ package com.dubbohelper.admin.service.sync;
 import com.dubbohelper.admin.common.config.Config;
 import com.dubbohelper.admin.dto.Application;
 import com.dubbohelper.admin.dto.Constants;
-import com.dubbohelper.admin.dto.MavenCoordDTO;
 import com.dubbohelper.admin.dto.URL;
 import com.dubbohelper.admin.dto.Version;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.net.URLDecoder;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -48,13 +45,6 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
      * value：应用实体
      */
     public ConcurrentMap<String, Application> registryApplicationMap = new ConcurrentHashMap<>();
-
-    /**
-     * 坐标列表
-     * GroupId + "." + ArtifactId
-     */
-    public Set<String> mavenDTOSet = new HashSet<>();
-
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -110,9 +100,6 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
                     application.getVersions().add(version);
                 }
                 registryApplicationMap.put(applicationName, application);
-
-                String mavenKey = groupId + "." + artifactId;
-                mavenDTOSet.add(mavenKey);
             }
         }
         listener();
@@ -189,9 +176,6 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
             application.getVersions().add(version);
         }
         registryApplicationMap.put(applicationName, application);
-
-        String mavenKey = groupId + "." + artifactId;
-        mavenDTOSet.add(mavenKey);
     }
 
     private void update(String path) {
@@ -244,11 +228,6 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
         if (app.getVersions().size() == 0) {
             registryApplicationMap.remove(applicationName);
         }
-
-        String groupId = url.getParameters().get(Constants.GROUP_ID);
-        String artifactId = url.getParameters().get(Constants.ARTIFACT_ID);
-        String mavenKey = groupId + "." + artifactId;
-        mavenDTOSet.remove(mavenKey);
     }
 
     @Override
@@ -258,13 +237,11 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
     }
 
     private boolean hasEmpty(String... strs) {
-        boolean b = false;
         for (String str : strs) {
             if (StringUtils.isEmpty(str)) {
-                b = true;
                 return true;
             }
         }
-        return b;
+        return false;
     }
 }
