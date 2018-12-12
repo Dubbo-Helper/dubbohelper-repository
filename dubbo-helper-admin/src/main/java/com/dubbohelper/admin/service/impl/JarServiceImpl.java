@@ -5,11 +5,14 @@ import com.dubbohelper.admin.common.util.FileUtil;
 import com.dubbohelper.admin.common.util.MavenUtil;
 import com.dubbohelper.admin.dto.MavenCoordDTO;
 import com.dubbohelper.admin.dto.MavenDataDTO;
+import com.dubbohelper.admin.service.ConfigureService;
 import com.dubbohelper.admin.service.JarService;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.eclipse.aether.version.Version;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -27,6 +30,9 @@ public class JarServiceImpl implements JarService {
     private static Map<String, MavenCoordDTO> applicationInfos = Maps.newConcurrentMap();
 
     private static Map<String, MavenCoordDTO> jarInfos = Maps.newConcurrentMap();
+
+    @Autowired
+    private ConfigureService configureService;
 
     @Override
     public Map<String, MavenCoordDTO> searchApplication(String artifactId) {
@@ -75,6 +81,7 @@ public class JarServiceImpl implements JarService {
     public boolean insertOrUpdateJar(MavenCoordDTO dto) {
         MavenDataDTO mavenDataDTO = new MavenDataDTO(dto);
         try {
+            mavenDataDTO.setRepository(configureService.getConfigures().getRepositoryPath());
             MavenUtil.downLoad(mavenDataDTO);
         } catch (ArtifactResolutionException e) {
             log.error("拉取jar包失败", e);
@@ -101,6 +108,25 @@ public class JarServiceImpl implements JarService {
         }
 
         return true;
+    }
+
+    @Override
+    public List<String> getJarVersions(MavenCoordDTO dto) {
+        List<String> result = new ArrayList<>();
+
+        MavenDataDTO mavenDataDTO = new MavenDataDTO(dto);
+        mavenDataDTO.setRepository(configureService.getConfigures().getRepositoryPath());
+        try {
+            List<Version> versions = MavenUtil.getAllVersions(mavenDataDTO);
+            if (CollectionUtils.isNotEmpty(versions)) {
+                for (Version version : versions) {
+                    result.add(version.toString());
+                }
+            }
+        } catch (Exception e) {
+            log.error("获取Jar在仓库中的所有版本失败",e);
+        }
+        return result;
     }
 
     /**

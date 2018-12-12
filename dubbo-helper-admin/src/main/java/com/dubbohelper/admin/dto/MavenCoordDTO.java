@@ -7,8 +7,10 @@ import lombok.Setter;
 @Getter
 public class MavenCoordDTO {
 
-
-
+    /**
+     * 应用名
+     */
+    private String applicationName;
     /**
      * jar包在maven仓库中的groupId
      */

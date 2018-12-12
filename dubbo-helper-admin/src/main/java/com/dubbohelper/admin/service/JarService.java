@@ -18,7 +18,7 @@ public interface JarService {
     /**
      * 搜索jar包列表
      *
-     * @param groupId groupId
+     * @param groupId    groupId
      * @param artifactId artifactId
      * @return jar包列表
      */
@@ -31,4 +31,12 @@ public interface JarService {
      * @return 处理结果
      */
     boolean insertOrUpdateJar(MavenCoordDTO dto);
+
+    /**
+     * 获取Jar在仓库中的所有版本
+     *
+     * @param dto jar maven坐标信息
+     * @return
+     */
+    List<String> getJarVersions(MavenCoordDTO dto);
 }
