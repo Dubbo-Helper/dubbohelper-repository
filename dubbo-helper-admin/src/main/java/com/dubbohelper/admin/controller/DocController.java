@@ -1,8 +1,6 @@
 package com.dubbohelper.admin.controller;
 
 import com.dubbohelper.admin.dto.SearchAppResDTO;
-import com.dubbohelper.admin.service.RegisterService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,7 +22,7 @@ public class DocController {
                 .groupId("com.zbj.finance.cashloan")
                 .artifactId("java-jinrong-cashloan-api")
                 .build();
-        list.add(dto1);
+        boolean add = list.add(dto1);
 
         SearchAppResDTO dto2 = SearchAppResDTO.builder()
                 .appName("java-jinrong-cashloan-web")
