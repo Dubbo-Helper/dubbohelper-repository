@@ -1,5 +1,6 @@
 package com.dubbohelper.admin.service.impl;
 
+import com.dubbohelper.admin.common.enums.FilePathEnum;
 import com.dubbohelper.admin.dto.MavenCoordDTO;
 import com.dubbohelper.admin.scanner.ApiDocScanner;
 import com.dubbohelper.admin.scanner.InterfaceInfo;
@@ -89,7 +90,7 @@ public class ApiDocServiceImpl implements ApiDocService {
         StringWriter sw = new StringWriter();
         template.merge(ctx,sw);
 
-        String filePath = FileUtil.CLASS_PATH + fileName + ".md";
+        String filePath = FilePathEnum.TMEP.getAbsolutePath() + fileName + ".md";
         FileUtil.createFile(filePath, sw.toString());
 
         File file = new File(filePath);

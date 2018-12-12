@@ -3,6 +3,7 @@ package com.dubbohelper.admin.service;
 import com.dubbohelper.admin.dto.MavenCoordDTO;
 
 import java.util.List;
+import java.util.Map;
 
 public interface JarService {
 
@@ -12,7 +13,7 @@ public interface JarService {
      * @param artifactId artifactId
      * @return 项目列表
      */
-    List<MavenCoordDTO> searchApplication(String artifactId);
+    Map<String, MavenCoordDTO> searchApplication(String artifactId);
 
     /**
      * 搜索jar包列表

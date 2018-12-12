@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,8 +29,8 @@ public class JarServiceImpl implements JarService {
     private static Map<String, MavenCoordDTO> jarInfos = Maps.newConcurrentMap();
 
     @Override
-    public List<MavenCoordDTO> searchApplication(String artifactId) {
-        List<MavenCoordDTO> mavenCoordDTOS = new ArrayList<>();
+    public Map<String, MavenCoordDTO> searchApplication(String artifactId) {
+        Map<String, MavenCoordDTO> applications = new HashMap<>();
 
         if (applicationInfos.isEmpty()) {
             loadJarInfoFile();
@@ -41,13 +42,13 @@ public class JarServiceImpl implements JarService {
                 if (application.contains(artifactId)) {
                     MavenCoordDTO dto = applicationInfos.get(application);
                     if (dto.getArtifactId().contains(artifactId)) {
-                        mavenCoordDTOS.add(dto);
+                        applications.put(application, dto);
                     }
                 }
             }
         }
 
-        return mavenCoordDTOS;
+        return applications;
     }
 
     @Override
@@ -91,7 +92,7 @@ public class JarServiceImpl implements JarService {
         if (StringUtils.isEmpty(jarInfos.get(jarInfoKey))) {
             String applicationInfo = dto.getGroupId() + "|" + dto.getArtifactId() + "|" + dto.getVersion()
                     + "|" + new Date().toString() + "\n";
-            if (FileUtil.appendContent(FilePathEnum.JARINFOS.getPath(), applicationInfo)) {
+            if (FileUtil.appendContent(FilePathEnum.JARINFOS.getAbsolutePath(), applicationInfo)) {
                 applicationInfos.put(applicationInfoKey, dto);
                 jarInfos.put(jarInfoKey, dto);
             } else {
@@ -109,7 +110,7 @@ public class JarServiceImpl implements JarService {
         String template = "groupId|artifactId|version|date";
         String[] fields = template.split("[|]");
 
-        List<String> jarInfoList = FileUtil.readFileByLine(FilePathEnum.JARINFOS.getPath());
+        List<String> jarInfoList = FileUtil.readFileByLine(FilePathEnum.JARINFOS.getAbsolutePath());
         if (CollectionUtils.isNotEmpty(jarInfoList)) {
             for (String jarInfo : jarInfoList) {
                 String[] values = jarInfo.split("[|]");

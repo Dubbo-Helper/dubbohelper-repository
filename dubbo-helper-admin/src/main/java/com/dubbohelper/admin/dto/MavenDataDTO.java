@@ -30,7 +30,7 @@ public class MavenDataDTO {
     /**
      * 下载的jar包存放的目标地址，默认为./target/repo
      */
-    private String target = FilePathEnum.JARPATH.getPath();
+    private String target = FilePathEnum.JARPATH.getRelativePath();
     /**
      * 登录远程maven仓库的用户名，若远程仓库不需要权限，设为null，默认为null
      */

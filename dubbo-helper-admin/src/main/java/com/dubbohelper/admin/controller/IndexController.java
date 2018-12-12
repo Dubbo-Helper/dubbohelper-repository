@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -24,22 +26,19 @@ public class IndexController implements InitializingBean {
     private RegisterService registerService;
 
     @RequestMapping("/searchApplication")
-    public String searchApplication(String artifactId) {
-        List<MavenCoordDTO> result = new ArrayList<>();
+    public List<MavenCoordDTO> searchApplication(String artifactId) {
 
-        List<MavenCoordDTO> localList = jarService.searchApplication(artifactId);
-        result.addAll(localList);
+        Map<String, MavenCoordDTO> applications = new HashMap<>();
+        applications.putAll(jarService.searchApplication(artifactId));
+        applications.putAll(registerService.search(artifactId));
 
-        List<MavenCoordDTO> zkList = new ArrayList<>();
-        result.addAll(zkList);
-
-        return new Gson().toJson(result);
+        return new ArrayList<>(applications.values());
     }
 
 
     @RequestMapping("/getJars")
     public String getJars(MavenCoordDTO dto) {
-        List<MavenCoordDTO> result = jarService.getJars(dto.getGroupId(),dto.getArtifactId());
+        List<MavenCoordDTO> result = jarService.getJars(dto.getGroupId(), dto.getArtifactId());
 
         return new Gson().toJson(result);
     }

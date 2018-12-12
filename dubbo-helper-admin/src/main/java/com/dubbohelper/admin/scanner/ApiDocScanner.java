@@ -30,13 +30,12 @@ public class ApiDocScanner {
     public Map<ServiceInfo, List<InterfaceInfo>> getJarAnnotation(MavenCoordDTO dto) {
         String key = dto.getGroupId() + "." + dto.getArtifactId() + "." + dto.getVersion();
         if (!JAR_ANNOTATION_CACHE.containsKey(key)) {
-            String jarPath =  FilePathEnum.JARPATH.getPath();
+            String jarPath =  FilePathEnum.JARPATH.getRelativePath();
             jarPath = jarPath + dto.getGroupId().replace(".", File.separator) + File.separator
                     + dto.getArtifactId() + File.separator + dto.getVersion() + File.separator
                     + dto.getArtifactId() + "-" + dto.getVersion() + ".jar";
             loadJar(key, jarPath, new String[]{dto.getGroupId()});
         }
-
 
         return JAR_ANNOTATION_CACHE.get(key);
     }

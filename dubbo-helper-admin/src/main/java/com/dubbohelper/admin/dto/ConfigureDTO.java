@@ -16,9 +16,4 @@ public class ConfigureDTO {
      * maven仓库地址
      */
     private String repositoryPath;
-
-    /**
-     * 系统文件根路径
-     */
-    private String fileRootPath;
 }
