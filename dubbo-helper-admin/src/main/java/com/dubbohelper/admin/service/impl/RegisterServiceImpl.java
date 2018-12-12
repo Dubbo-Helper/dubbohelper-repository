@@ -1,5 +1,6 @@
 package com.dubbohelper.admin.service.impl;
 
+import com.dubbohelper.admin.common.config.Config;
 import com.dubbohelper.admin.dto.Application;
 import com.dubbohelper.admin.dto.MavenCoordDTO;
 import com.dubbohelper.admin.service.RegisterService;
@@ -21,6 +22,8 @@ import java.util.Set;
 public class RegisterServiceImpl implements RegisterService {
     @Autowired
     private RegisterServiceSync registerServiceSync;
+    @Autowired
+    private Config config;
 
     @Override
     public Set<MavenCoordDTO> search(String keyWord) {
@@ -40,5 +43,18 @@ public class RegisterServiceImpl implements RegisterService {
             }
         }
         return set;
+    }
+
+    @Override
+    public void disconnect() {
+        registerServiceSync.destroy();
+    }
+
+    @Override
+    public void reConnection(String zkUrl) throws Exception {
+        config.setDubboUrl(zkUrl);
+        registerServiceSync.conn();
+        registerServiceSync.initAppList();
+        registerServiceSync.listener();
     }
 }

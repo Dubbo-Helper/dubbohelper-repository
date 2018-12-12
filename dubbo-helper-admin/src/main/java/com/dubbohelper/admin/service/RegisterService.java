@@ -17,5 +17,15 @@ public interface RegisterService {
      */
     Set<MavenCoordDTO> search(String keyWord);
 
+    /**
+     * 断开zk连接
+     * @throws Exception
+     */
+    void disconnect();
 
+    /**
+     * 重新连接zk
+     * @param zkUrl
+     */
+    void reConnection(String zkUrl) throws Exception;
 }

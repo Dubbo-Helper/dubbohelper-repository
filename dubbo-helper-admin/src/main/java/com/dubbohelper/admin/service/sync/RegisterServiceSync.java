@@ -48,60 +48,15 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (StringUtils.isEmpty(config.getDubboUrl())) {
-            log.warn("未设置zk链接地址");
-            return;
-        }
         try {
-            RetryPolicy retryPolicy = new ExponentialBackoffRetry(10000, 3);
-            client = CuratorFrameworkFactory.builder()
-                    .connectString(config.getDubboUrl())
-                    .retryPolicy(retryPolicy)
-                    .sessionTimeoutMs(10000)
-                    .connectionTimeoutMs(10000)
-                    .build();
-            client.start();
+            conn();
         } catch (Exception e) {
             log.error("zk连接失败 ", e);
             return;
         }
 
-        //初始化应用列表
-        List<String> serviceList = client.getChildren().forPath(Constants.DUBBO_PATH);
-        for (String service : serviceList) {
-            String path = new StringBuilder(Constants.DUBBO_PATH).append("/").append(service).append("/").append(Constants.PROVIDER).toString();
+        initAppList();
 
-            List<String> children = client.getChildren().forPath(path);
-            for (String urlStr : children) {
-                URL url = URL.valueOf(URL.decode(urlStr));
-
-                String applicationName = url.getParameters().get(Constants.APPLICATION);
-                String groupId = url.getParameters().get(Constants.GROUP_ID);
-                String artifactId = url.getParameters().get(Constants.ARTIFACT_ID);
-                String versionStr = url.getParameters().get(Constants.VERSION);
-                if (StringUtils.isEmpty(versionStr)) {
-                    versionStr = url.getParameters().get(Constants.APPLICATION_VERSION);
-                }
-                if (hasEmpty(applicationName, groupId, artifactId, versionStr)) {
-                    return;
-                }
-                String defaultVersion = "";
-                if (null != url.getParameters().get(Constants.DEFAULT_VERSION)) {
-                    defaultVersion = url.getParameters().get(Constants.DEFAULT_VERSION);
-                }
-                Application application = registryApplicationMap.get(applicationName);
-                if (null == application) {
-                    application = Application.builder().application(applicationName).groupId(groupId).artifactId(artifactId).path(path).build();
-                    application.setPath(path);
-                }
-                if (!StringUtils.isEmpty(versionStr)) {
-                    Version version = Version.builder().version(versionStr).build();
-                    version.getDefaultVersions().add(defaultVersion);
-                    application.getVersions().add(version);
-                }
-                registryApplicationMap.put(applicationName, application);
-            }
-        }
         listener();
     }
 
@@ -110,7 +65,7 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
      *
      * @throws Exception
      */
-    private void listener() throws Exception {
+    public void listener() throws Exception {
         cache = new TreeCache(client, Constants.DUBBO_PATH);
         TreeCacheListener listener1 = (client1, event) -> {
             TreeCacheEvent.Type type = event.getType();
@@ -230,10 +185,76 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
         }
     }
 
+    /**
+     * 连接zk
+     * @throws Exception
+     */
+    public void conn() throws Exception {
+        if (StringUtils.isEmpty(config.getDubboUrl())) {
+            throw new Exception("zk连接地址未设置");
+        }
+        destroy();
+        RetryPolicy retryPolicy = new ExponentialBackoffRetry(10000, 3);
+        client = CuratorFrameworkFactory.builder()
+                .connectString(config.getDubboUrl())
+                .retryPolicy(retryPolicy)
+                .sessionTimeoutMs(10000)
+                .connectionTimeoutMs(10000)
+                .build();
+        client.start();
+    }
+
+    /**
+     * 初始化应用列表
+     * @throws Exception
+     */
+    public void initAppList() throws Exception {
+        //初始化应用列表
+        List<String> serviceList = client.getChildren().forPath(Constants.DUBBO_PATH);
+        for (String service : serviceList) {
+            String path = new StringBuilder(Constants.DUBBO_PATH).append("/").append(service).append("/").append(Constants.PROVIDER).toString();
+
+            List<String> children = client.getChildren().forPath(path);
+            for (String urlStr : children) {
+                URL url = URL.valueOf(URL.decode(urlStr));
+
+                String applicationName = url.getParameters().get(Constants.APPLICATION);
+                String groupId = url.getParameters().get(Constants.GROUP_ID);
+                String artifactId = url.getParameters().get(Constants.ARTIFACT_ID);
+                String versionStr = url.getParameters().get(Constants.VERSION);
+                if (StringUtils.isEmpty(versionStr)) {
+                    versionStr = url.getParameters().get(Constants.APPLICATION_VERSION);
+                }
+                if (hasEmpty(applicationName, groupId, artifactId, versionStr)) {
+                    return;
+                }
+                String defaultVersion = "";
+                if (null != url.getParameters().get(Constants.DEFAULT_VERSION)) {
+                    defaultVersion = url.getParameters().get(Constants.DEFAULT_VERSION);
+                }
+                Application application = registryApplicationMap.get(applicationName);
+                if (null == application) {
+                    application = Application.builder().application(applicationName).groupId(groupId).artifactId(artifactId).path(path).build();
+                    application.setPath(path);
+                }
+                if (!StringUtils.isEmpty(versionStr)) {
+                    Version version = Version.builder().version(versionStr).build();
+                    version.getDefaultVersions().add(defaultVersion);
+                    application.getVersions().add(version);
+                }
+                registryApplicationMap.put(applicationName, application);
+            }
+        }
+    }
+
     @Override
     public void destroy() {
-        cache.close();
-        client.close();
+        if (null != cache) {
+            cache.close();
+        }
+        if (null != client) {
+            client.close();
+        }
     }
 
     private boolean hasEmpty(String... strs) {
