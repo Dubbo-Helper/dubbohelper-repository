@@ -3,6 +3,8 @@ package com.dubbohelper.admin.service;
 import com.dubbohelper.admin.dto.MavenCoordDTO;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface JarService {
 
@@ -12,16 +14,7 @@ public interface JarService {
      * @param artifactId artifactId
      * @return 项目列表
      */
-    List<MavenCoordDTO> searchApplication(String artifactId);
-
-    /**
-     * 搜索jar包列表
-     *
-     * @param groupId groupId
-     * @param artifactId artifactId
-     * @return jar包列表
-     */
-    List<MavenCoordDTO> getJars(String groupId, String artifactId);
+    Set<MavenCoordDTO> search(String artifactId);
 
     /**
      * 添加或更新jar包
@@ -30,4 +23,12 @@ public interface JarService {
      * @return 处理结果
      */
     boolean insertOrUpdateJar(MavenCoordDTO dto);
+
+    /**
+     * 获取Jar在仓库中的所有版本
+     *
+     * @param dto jar maven坐标信息
+     * @return
+     */
+    List<String> getJarVersions(MavenCoordDTO dto);
 }

@@ -1,7 +1,8 @@
 package com.dubbohelper.admin.service.impl;
 
+import com.dubbohelper.admin.common.config.Config;
 import com.dubbohelper.admin.dto.Application;
-import com.dubbohelper.admin.dto.SearchAppResDTO;
+import com.dubbohelper.admin.dto.MavenCoordDTO;
 import com.dubbohelper.admin.service.RegisterService;
 import com.dubbohelper.admin.service.sync.RegisterServiceSync;
 import lombok.extern.slf4j.Slf4j;
@@ -9,9 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by zhangxiaoman on 2018/11/15.
@@ -21,26 +22,39 @@ import java.util.Map;
 public class RegisterServiceImpl implements RegisterService {
     @Autowired
     private RegisterServiceSync registerServiceSync;
+    @Autowired
+    private Config config;
 
     @Override
-    public List<SearchAppResDTO> search(String keyWord) {
-        List<SearchAppResDTO> list = new ArrayList<>();
+    public Set<MavenCoordDTO> search(String keyWord) {
+        Set<MavenCoordDTO> set = new HashSet<>();
         if (!StringUtils.isEmpty(keyWord)) {
             for (Map.Entry<String, Application> entry : registerServiceSync.registryApplicationMap.entrySet()) {
                 String appName = entry.getKey();
                 if (appName.contains(keyWord)) {
                     Application app = entry.getValue();
-                    SearchAppResDTO searchAppResDTO = SearchAppResDTO.builder()
-                            .appName(app.getApplication())
+                    MavenCoordDTO mavenCoordDTO = MavenCoordDTO.builder()
+                            .applicationName(app.getApplication())
                             .groupId(app.getGroupId())
                             .artifactId(app.getArtifactId())
                             .build();
-                    list.add(searchAppResDTO);
+                    set.add(mavenCoordDTO);
                 }
             }
         }
-        //TODO  本地缓存jar包解析项目
-        return list;
+        return set;
     }
 
+    @Override
+    public void disconnect() {
+        registerServiceSync.destroy();
+    }
+
+    @Override
+    public void reConnection(String zkUrl) throws Exception {
+        config.setDubboUrl(zkUrl);
+        registerServiceSync.conn();
+        registerServiceSync.initAppList();
+        registerServiceSync.listener();
+    }
 }

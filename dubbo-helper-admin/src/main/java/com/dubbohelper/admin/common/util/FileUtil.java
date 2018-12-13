@@ -1,6 +1,5 @@
 package com.dubbohelper.admin.common.util;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
@@ -16,8 +15,6 @@ import java.util.List;
 @Slf4j
 public class FileUtil {
 
-    public static final String CLASS_PATH = FileUtil.class.getResource("/").getPath();
-
     /**
      * 生成文件
      *
@@ -29,7 +26,7 @@ public class FileUtil {
             File file = new File(filePath);
             FileUtils.writeStringToFile(file, fileContent, "utf-8", false);
         } catch (Exception e) {
-            log.error("生成文档失败", e);
+            log.error("生成文档失败:{}", filePath, e);
             return false;
         }
 
@@ -47,7 +44,7 @@ public class FileUtil {
             File file = new File(filePath);
             FileUtils.writeStringToFile(file, fileContent, "utf-8", true);
         } catch (Exception e) {
-            log.error("文件追加内容失败", e);
+            log.error("文件追加内容失败:{}", filePath, e);
             return false;
         }
 
@@ -66,6 +63,7 @@ public class FileUtil {
         } catch (Exception e) {
             log.error("读取文档失败:{}", filePath, e);
         }
+
         return null;
     }
 
@@ -81,6 +79,7 @@ public class FileUtil {
         } catch (Exception e) {
             log.error("读取文档失败:{}", filePath, e);
         }
+
         return null;
     }
 
@@ -89,12 +88,15 @@ public class FileUtil {
      *
      * @param filePath 路径 + 文件名
      */
-    public static void deleteFile(String filePath) {
+    public static boolean deleteFile(String filePath) {
         try {
             File file = new File(filePath);
             FileUtils.forceDeleteOnExit(file);
         } catch (Exception e) {
             log.error("删除文档失败:{}", filePath, e);
+            return false;
         }
+
+        return true;
     }
 }

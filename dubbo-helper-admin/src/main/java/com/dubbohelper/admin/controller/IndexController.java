@@ -3,15 +3,17 @@ package com.dubbohelper.admin.controller;
 import com.dubbohelper.admin.dto.MavenCoordDTO;
 import com.dubbohelper.admin.service.JarService;
 import com.dubbohelper.admin.service.RegisterService;
-import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
+import javax.validation.Valid;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -23,25 +25,26 @@ public class IndexController implements InitializingBean {
     @Autowired
     private RegisterService registerService;
 
-    @RequestMapping("/searchApplication")
-    public String searchApplication(String artifactId) {
-        List<MavenCoordDTO> result = new ArrayList<>();
+    @RequestMapping("/search")
+    public Set<MavenCoordDTO> searchApplication(String artifactId) {
+        Set<MavenCoordDTO> result = new HashSet<>();
 
-        List<MavenCoordDTO> localList = jarService.searchApplication(artifactId);
-        result.addAll(localList);
+        Set<MavenCoordDTO> local = jarService.search(artifactId);
+        Set<MavenCoordDTO> zk = registerService.search(artifactId);
+        result.addAll(local);
+        result.addAll(zk);
 
-        List<MavenCoordDTO> zkList = new ArrayList<>();
-        result.addAll(zkList);
-
-        return new Gson().toJson(result);
+        return result;
     }
 
+    @RequestMapping("/insertOrUpdateJar")
+    public boolean insertOrUpdateJar(@RequestBody @Valid MavenCoordDTO dto) {
+        return jarService.insertOrUpdateJar(dto);
+    }
 
-    @RequestMapping("/getJars")
-    public String getJars(MavenCoordDTO dto) {
-        List<MavenCoordDTO> result = jarService.getJars(dto.getGroupId(),dto.getArtifactId());
-
-        return new Gson().toJson(result);
+    @RequestMapping("/getJarVersions")
+    public List<String> getJarVersions(@RequestBody @Valid MavenCoordDTO dto) {
+        return jarService.getJarVersions(dto);
     }
 
     @Override
