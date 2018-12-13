@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+		<title>添加jar包</title>
+	</head>
+	<body>
+		<div id="download">
+			<el-row >
+				<el-col :span="4" :offset="4">
+					<el-input v-model="groupId" size="medium" placeholder="groupId"></el-input>
+				</el-col>
+				
+				<el-col :span="4">
+					<el-input v-model="artifactId" size="medium" placeholder="artifactId"></el-input>
+				</el-col>
+				<el-col :span="4" >
+					<el-input v-model="vrsion" size="medium" placeholder="vrsion"></el-input>
+				</el-col>
+				<el-col :span="4">
+					<el-button round>添加</el-button>
+				</el-col>
+			</el-row>
+			<el-row>
+			<el-col :span="12" :offset="4"><div class="grid-content bg-purple-dark" style="height:50px;text-align:center;line-height:50px;">API jar包列表</div></el-col>
+			</el-row>
+			
+			<el-row :gutter="20">
+				<el-col :span="12" :offset="4" >
+					<template>
+					<el-table :data="tableData"  :show-header="false" style="width: 100%">
+					<el-table-column 		 prop="name"	>
+						<template slot-scope="scope"><a href="interface.html"  style="color:black;text-decoration:none;">
+						{{ scope.row.name }}</a></template>
+					</el-table-column>
+					<el-table-column 		 prop="type" 	>
+						<template slot-scope="scope">
+							<el-button
+							  size="mini"
+							  @click="handleEdit(scope.$index, scope.row)" :loading="true">更新jar</el-button>
+								<!-- <el-progress type="circle" :percentage="25"></el-progress> -->
+						</template>						
+					</el-table-column>
+				</el-table>
+				</template>
+				<el-col>
+			</el-row>
+		</div>
+		
+	</body>
+	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+	<script type="text/javascript">
+	    const vm = new Vue({
+	        el: '#download',
+	        data() {
+	            return {
+	            tableData: [{
+	            	name: 'java-jinrong-cashloan-api.jar'
+	            }, {
+	            	name: 'java-jinrong-cashloan-api.jar'
+	            }, {
+	            	name: 'java-jinrong-cashloan-api.jar'
+	            }, {
+	            	name: 'java-jinrong-cashloan-api.jar'
+	            }]
+	            };
+	        },
+	        created() {
+	            
+	        },
+	        methods: {                  }
+	    })
+	</script>
+	<style>
+		.el-col {
+		border-radius: 4px;
+		padding 20px 0;
+		
+		}
+		 .el-row {
+    margin-top: 40px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  .el-col {
+    border-radius: 40px;
+  }	
+  .bg-purple-dark {
+    background: #99a9bf;
+  }
+	</style>	
+</html>

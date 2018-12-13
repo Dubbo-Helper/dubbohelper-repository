@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+		<link rel="stylesheet" href="css/interface.css">
+		<title>接口列表</title>
+	</head>
+	<body>
+		<div id="app" style="width: 80%; margin:0 auto;">
+			<el-container width="80%">
+			  <!-- <el-header>Header</el-header> -->
+			  <el-container>
+				<el-aside width="35%">
+					<el-row :gutter="20">
+					<el-col :span="23"><div class="grid-content bg-content">
+					<el-card class="box-card">
+						<div slot="header" class="clearfix" style="position:relative;">
+							<span style="float: left;">服务名</span>
+							<span style="position:absolute;top:-15px;left:70px;width:200px;">
+							<el-select v-model="selectValue" placeholder="请选择">
+								<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+								</el-option>
+							</el-select>
+							</span>
+							<!-- <el-row>
+								  <el-col :span="10" :offset="12">
+										<span class="demonstration">xx.jar</span>
+										<el-dropdown>
+											<span class="el-dropdown-link">
+												API版本<i class="el-icon-arrow-down el-icon--right"></i>
+											</span>
+											<el-dropdown-menu slot="dropdown">
+												<el-dropdown-item>xx.jar</el-dropdown-item>
+												<el-dropdown-item>xx.jar</el-dropdown-item>
+												<el-dropdown-item>xx.jar</el-dropdown-item>
+												<el-dropdown-item>xx.jar</el-dropdown-item>
+												<el-dropdown-item>xx.jar</el-dropdown-item>
+											</el-dropdown-menu>
+										</el-dropdown>
+									</el-col>
+									</el-row> -->
+						</div>
+							<el-table :data="tableData" :show-header="false" style="width: 100%">
+							<el-table-column 		 prop="data"	>
+								<template slot-scope="scope">
+									<p>{{ scope.row.index }}.{{ scope.row.name }}</p>
+									<a href="#"  style="color:black;text-decoration:none;">{{ scope.row.url }}</a>
+									</template>
+							</el-table-column>
+						</el-table>
+					</el-card>
+					</div></el-col>
+					</el-row>
+					<el-row :gutter="20">
+					<el-col :span="23" ><div class="grid-content bg-content">
+					<el-card class="box-card">
+						<div slot="header" class="clearfix">
+							<span>方法名</span>
+						</div>
+							<el-table :data="tableData2" :show-header="false" style="width: 100%">
+								<el-table-column 		 prop="data"	>
+									<template slot-scope="scope">
+										<p>{{ scope.row.index }}.{{ scope.row.name }}</p>
+										<a href="#"  style="color:black;text-decoration:none;">{{ scope.row.url }}</a>
+										</template>
+								</el-table-column>
+							</el-table>
+					</el-card>
+					</div></el-col>
+					</el-row>
+				</el-aside>
+				<el-container>
+				<el-main >
+					<el-card class="box-card">
+						<div slot="header" class="clearfix">
+							<span>接口信息</span>
+						</div>
+							<el-row >
+									<el-col :span="4"><span class="fontSpan">接口名称</span></el-col>
+							</el-row>
+							<el-row >
+									<el-col :span="4"><span class="fontSpan" >方法名</span></el-col>
+							</el-row>
+							<el-row >
+									<el-col :span="4"><span class="fontSpan" >用法</span></el-col>
+							</el-row>
+							<el-row >
+									<el-col :span="4"><a href="checkout.html" style="text-decoration:none;"><span>测试一把<span></a></el-col>
+							</el-row>
+							<el-row >
+									<el-col :span="4"><span class="fontSpan" >请求要数（）</span></el-col>
+							</el-row>
+								<el-row :gutter="20">
+									<el-col :span="24" ><div style="text-align:center;border:1px solid  #99a9bf;">
+											<el-table :data="tableData3" style="width: 100%">
+											<el-table-column      label="参数名称"        prop="name"              >
+											</el-table-column>
+											<el-table-column      label="参数类型"        prop="name"              >
+											</el-table-column>
+											<el-table-column      label="必输"        prop="name"              >
+											</el-table-column>
+											<el-table-column      label="参数描述"        prop="name"              >
+											</el-table-column>
+											<el-table-column      label="字典描述"        prop="name"              >
+											</el-table-column>
+										</el-table>
+									
+									</div></el-col>
+							</el-row>
+							<el-row >
+									<el-col :span="4"><span class="fontSpan">应答要素（）</span></el-col>
+							</el-row>
+								<el-row :gutter="20">
+									<el-col :span="24" ><div style="text-align:center;border:1px solid  #99a9bf;">
+											<el-table :data="tableData4" style="width: 100%">
+											<el-table-column      label="参数名称"        prop="name"              >
+											</el-table-column>
+											<el-table-column      label="参数类型"        prop="name"              >
+											</el-table-column>
+											<el-table-column      label="必输"        prop="name"              >
+											</el-table-column>
+											<el-table-column      label="参数描述"        prop="name"              >
+											</el-table-column>
+											<el-table-column      label="字典描述"        prop="name"              >
+											</el-table-column>
+										</el-table>
+									</div></el-col>
+							</el-row>
+					</el-card>
+				</el-main>
+				</el-container>
+			  </el-container>
+			</el-container>
+		</div>
+	</body>
+	<script src="//unpkg.com/vue/dist/vue.js"></script>
+<script src="//unpkg.com/element-ui@2.4.11/lib/index.js"></script>
+		<script type="text/javascript">
+			const vm = new Vue({
+				el: '#app',
+				data() {
+					return {
+	            tableData: [{
+	            	name: '账户相关接口',
+								url: 'com.zbj.finance.cashloan.api.service.AccountService'
+	            },{
+	            	name: '活动相关接口',
+								url: 'com.zbj.finance.cashloan.api.service.ActivityService'
+	            }],
+							tableData2: [{
+								name: '查询余额',
+								url: 'queryBalance'
+							},{
+								name: '查询账户流水',
+								url: 'queryCashFlow'
+							}],
+							options: [{
+          value: '选项1',
+          label: 'xxx.jar'
+        }, {
+          value: '选项2',
+          label: 'xxx.jar'
+        }, {
+          value: '选项3',
+          label: 'xxx.jar'
+        }, {
+          value: '选项4',
+          label: 'xxx.jar'
+        }, {
+          value: '选项5',
+          label: 'xxx.jar'
+        }],
+				selectValue:''
+	            };
+				},
+				created() {
+					
+				},
+				methods: {                  }
+			})
+		</script>
+		<style>
+			.el-header{
+			background-color: #B3C0D1;
+			color: #333;
+			text-align: center;
+			line-height: 60px;
+		  }
+		  
+		  .el-aside {
+			color: #333;
+			/* text-align: left; */
+			/* line-height: 200px; */
+		  }
+		  
+		  .el-main {
+			background-color: #E9EEF3;
+			color: #333;
+			/* width: auto; */
+		  }
+		  
+		  body > .el-container {
+			/* margin-bottom: 40px; */
+		  }
+		  
+		  .el-container:nth-child(5) .el-aside,
+		  .el-container:nth-child(6) .el-aside {
+			/* line-height: 260px; */
+		  }
+		  
+		  .el-container:nth-child(7) .el-aside {
+			/* line-height: 320px; */
+		  }
+	  .el-card__header {
+	    background: #f5f5f5;
+		height: 30px;
+		line-height: 2px;
+	}
+	.fontSpan{
+		color: #008000;
+		font-size: 14px;
+	}
+	/* .box-card {
+	width: 100%;
+	margin:0 auto;
+	margin-top: 10px;
+	} */
+	.el-input__inner{
+		height:30px;
+		line-height:30px;
+	}
+		</style>
+</html>

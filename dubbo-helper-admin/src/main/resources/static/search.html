@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>jar列表查询</title>
+		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+	</head>
+	<body>
+	<div id="search">
+		<el-row>
+			<el-col :span="8" :offset="4">
+				<el-input placeholder="回显的应用名" class="input-with-select">
+						<el-button slot="append" icon="el-icon-search">搜索</el-button>
+				</el-input>
+			</el-col>
+		</el-row>
+	<el-row :gutter="20">
+		<el-col :span="12" :offset="4" >
+			<template>
+			<el-table
+			:data="tableData" border
+			style="width: 100%">
+			
+			<el-table-column 		 prop="name"		 label="应用列表">
+				<template slot-scope="scope"><a href="download.html"  style="color:black;text-decoration:none;">{{ scope.row.name }}</a></template>
+			</el-table-column>
+			<el-table-column 		 prop="sc" 		label="收藏" width="80%">
+				<template slot-scope="scope">
+  <el-rate v-model="value1" max="1"></el-rate>
+					<!-- <el-button
+					  size="mini"
+					  @click="handleEdit(scope.$index, scope.row)"><i class="el-icon-star-on"></i></el-button> -->
+				</template>
+			</el-table-column>
+		</el-table>
+		</template>
+		<el-col>
+	</el-row>
+	</div>
+	</body>
+	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+	<script type="text/javascript">
+	    const vm = new Vue({
+	        el: '#search',
+	        data() {
+	            return {
+	            tableData: [{
+	            	name: 'java-jinrong-cashloan-web'
+	            }, {
+	            	name: 'java-jinrong-cashloan-web'
+	            }, {
+	            	name: 'java-jinrong-cashloan-web'
+	            }, {
+	            	name: 'java-jinrong-cashloan-web'
+	            }]
+	            };
+	        },
+	        created() {
+	            
+	        },
+	        methods: {                  }
+	    })
+	</script>
+	
+	<style>
+		 .el-col {
+	    border-radius: 4px;
+		padding: 20px 0;
+	    }
+	</style>
+</html>
