@@ -3,7 +3,6 @@ package com.dubbohelper.admin.controller;
 import com.dubbohelper.admin.dto.MavenCoordDTO;
 import com.dubbohelper.admin.service.JarService;
 import com.dubbohelper.admin.service.RegisterService;
-import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -28,20 +26,15 @@ public class IndexController implements InitializingBean {
     private RegisterService registerService;
 
     @RequestMapping("/search")
-    public List<MavenCoordDTO> searchApplication(String artifactId) {
+    public Set<MavenCoordDTO> searchApplication(String artifactId) {
+        Set<MavenCoordDTO> result = new HashSet<>();
 
-        Map<String, MavenCoordDTO> applications = new HashMap<>();
-        applications.putAll(jarService.searchApplication(artifactId));
+        Set<MavenCoordDTO> local = jarService.search(artifactId);
+        Set<MavenCoordDTO> zk = registerService.search(artifactId);
+        result.addAll(local);
+        result.addAll(zk);
 
-        return new ArrayList<>(applications.values());
-    }
-
-
-    @RequestMapping("/getJars")
-    public String getJars(@RequestBody @Valid MavenCoordDTO dto) {
-        List<MavenCoordDTO> result = jarService.getJars(dto.getGroupId(), dto.getArtifactId());
-
-        return new Gson().toJson(result);
+        return result;
     }
 
     @RequestMapping("/insertOrUpdateJar")

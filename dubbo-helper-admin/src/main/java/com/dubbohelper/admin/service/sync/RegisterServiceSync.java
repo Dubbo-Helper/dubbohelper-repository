@@ -5,6 +5,7 @@ import com.dubbohelper.admin.dto.Application;
 import com.dubbohelper.admin.dto.Constants;
 import com.dubbohelper.admin.dto.URL;
 import com.dubbohelper.admin.dto.Version;
+import com.dubbohelper.admin.service.ConfigureService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
@@ -34,6 +35,8 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
 
     @Autowired
     private Config config;
+    @Autowired
+    private ConfigureService configureService;
 
     private static CuratorFramework client;
 
@@ -190,13 +193,13 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
      * @throws Exception
      */
     public void conn() throws Exception {
-        if (StringUtils.isEmpty(config.getDubboUrl())) {
+        if (StringUtils.isEmpty(configureService.getConfigures().getZkAddress())) {
             throw new Exception("zk连接地址未设置");
         }
         destroy();
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(10000, 3);
         client = CuratorFrameworkFactory.builder()
-                .connectString(config.getDubboUrl())
+                .connectString(configureService.getConfigures().getZkAddress())
                 .retryPolicy(retryPolicy)
                 .sessionTimeoutMs(10000)
                 .connectionTimeoutMs(10000)

@@ -76,7 +76,7 @@ public class ApiDocServiceImpl implements ApiDocService {
         // 设置Velocity变量
         VelocityContext ctx = new VelocityContext();
         ctx.put("mapKey", fileName);
-        ctx.put("serviceList",scanner.getJarAnnotation(dto));
+        ctx.put("serviceList", scanner.getJarAnnotation(dto));
         // 初始化Velocity模板引擎
         VelocityEngine ve = new VelocityEngine();
         ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
@@ -88,20 +88,20 @@ public class ApiDocServiceImpl implements ApiDocService {
         Template template = ve.getTemplate("apiDoc.md.vm");
         // 输出
         StringWriter sw = new StringWriter();
-        template.merge(ctx,sw);
+        template.merge(ctx, sw);
 
         String filePath = FilePathEnum.TMEP.getAbsolutePath() + fileName + ".md";
         FileUtil.createFile(filePath, sw.toString());
 
         File file = new File(filePath);
-        if(!file.exists()){
+        if (!file.exists()) {
             throw new FileNotFoundException("文件不存在");
         }
         FileInputStream in = new FileInputStream(file);
         byte[] buffer = new byte[1024];
         int length = 0;
-        while ((length = in.read(buffer)) > 0){
-            outputStream.write(buffer,0,length);
+        while ((length = in.read(buffer)) > 0) {
+            outputStream.write(buffer, 0, length);
         }
 
         FileUtil.deleteFile(filePath);

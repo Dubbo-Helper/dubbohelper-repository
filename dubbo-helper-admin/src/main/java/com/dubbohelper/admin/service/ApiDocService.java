@@ -26,8 +26,8 @@ public interface ApiDocService {
     /**
      * 获取服务包含方法列表
      *
-     * @param dto jar坐标信息
-     * @param className   服务名
+     * @param dto       jar坐标信息
+     * @param className 服务名
      * @return
      */
     List<InterfaceInfo> listInterface(MavenCoordDTO dto, String className);
@@ -35,9 +35,9 @@ public interface ApiDocService {
     /**
      * 获取方法详情
      *
-     * @param dto jar坐标信息
-     * @param className   服务名
-     * @param methodName  方法名
+     * @param dto        jar坐标信息
+     * @param className  服务名
+     * @param methodName 方法名
      * @return
      */
     InterfaceInfo interfaceDetail(MavenCoordDTO dto, String className, String methodName);
@@ -45,7 +45,7 @@ public interface ApiDocService {
     /**
      * 文件下载
      *
-     * @param dto jar坐标信息
+     * @param dto          jar坐标信息
      * @param fileName     文件名
      * @param outputStream 文件内容
      */

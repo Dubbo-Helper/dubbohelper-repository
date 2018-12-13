@@ -162,26 +162,4 @@ public class ApiDocScanner {
         }
         return new Class[0];
     }
-
-    public static void main(String[] args) {
-
-        ApiDocScanner scanner = new ApiDocScanner();
-        MavenCoordDTO dto = new MavenCoordDTO();
-        dto.setGroupId("com.dubbohelper.test.api");
-        dto.setArtifactId("java-dubbohelper-test-api");
-        dto.setVersion("1.1.0");
-        scanner.getJarAnnotation(dto);
-
-        MavenCoordDTO dto1 = new MavenCoordDTO();
-        dto1.setGroupId("com.dubbohelper.test2.api");
-        dto1.setArtifactId("java-dubbohelper-test2-api");
-        dto1.setVersion("1.12.0-SNAPSHOT");
-        scanner.getJarAnnotation(dto1);
-
-        MavenCoordDTO dto2 = new MavenCoordDTO();
-        dto2.setGroupId("com.dubbohelper.test.api");
-        dto2.setArtifactId("java-dubbohelper-test-api");
-        dto2.setVersion("1.1.0");
-        scanner.getJarAnnotation(dto2);
-    }
 }

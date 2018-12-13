@@ -19,6 +19,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,8 +36,8 @@ public class JarServiceImpl implements JarService {
     private ConfigureService configureService;
 
     @Override
-    public Map<String, MavenCoordDTO> searchApplication(String artifactId) {
-        Map<String, MavenCoordDTO> applications = new HashMap<>();
+    public Set<MavenCoordDTO> search(String artifactId) {
+        Set<MavenCoordDTO> applications = new HashSet<>();
 
         if (applicationInfos.isEmpty()) {
             loadJarInfoFile();
@@ -48,33 +49,18 @@ public class JarServiceImpl implements JarService {
                 if (application.contains(artifactId)) {
                     MavenCoordDTO dto = applicationInfos.get(application);
                     if (dto.getArtifactId().contains(artifactId)) {
-                        applications.put(application, dto);
+                        MavenCoordDTO mavenCoordDTO = MavenCoordDTO.builder()
+                                .applicationName(dto.getApplicationName())
+                                .groupId(dto.getGroupId())
+                                .artifactId(dto.getArtifactId())
+                                .build();
+                        applications.add(mavenCoordDTO);
                     }
                 }
             }
         }
 
         return applications;
-    }
-
-    @Override
-    public List<MavenCoordDTO> getJars(String groupId, String artifactId) {
-        List<MavenCoordDTO> mavenCoordDTOS = new ArrayList<>();
-
-        if (jarInfos.isEmpty()) {
-            loadJarInfoFile();
-        }
-        Set<String> list = jarInfos.keySet();
-
-        if (CollectionUtils.isNotEmpty(list)) {
-            for (String jarInfo : list) {
-                if (jarInfo.contains(groupId + "." + artifactId)) {
-                    mavenCoordDTOS.add(jarInfos.get(jarInfo));
-                }
-            }
-        }
-
-        return mavenCoordDTOS;
     }
 
     @Override
@@ -97,7 +83,7 @@ public class JarServiceImpl implements JarService {
         String applicationInfoKey = dto.getGroupId() + "." + dto.getArtifactId();
         String jarInfoKey = applicationInfoKey + "." + dto.getVersion();
         if (StringUtils.isEmpty(jarInfos.get(jarInfoKey))) {
-            String applicationInfo = dto.getGroupId() + "|" + dto.getArtifactId() + "|" + dto.getVersion()
+            String applicationInfo = dto.getApplicationName() + "|" +dto.getGroupId() + "|" + dto.getArtifactId() + "|" + dto.getVersion()
                     + "|" + new Date().toString() + "\n";
             if (FileUtil.appendContent(FilePathEnum.JARINFOS.getAbsolutePath(), applicationInfo)) {
                 applicationInfos.put(applicationInfoKey, dto);
@@ -124,7 +110,7 @@ public class JarServiceImpl implements JarService {
                 }
             }
         } catch (Exception e) {
-            log.error("获取Jar在仓库中的所有版本失败",e);
+            log.error("获取Jar在仓库中的所有版本失败", e);
         }
         return result;
     }
@@ -133,7 +119,7 @@ public class JarServiceImpl implements JarService {
      * 加载文件内容并缓存
      */
     private void loadJarInfoFile() {
-        String template = "groupId|artifactId|version|date";
+        String template = "applicationName|groupId|artifactId|version|date";
         String[] fields = template.split("[|]");
 
         List<String> jarInfoList = FileUtil.readFileByLine(FilePathEnum.JARINFOS.getAbsolutePath());
@@ -145,12 +131,14 @@ public class JarServiceImpl implements JarService {
                     continue;
                 }
 
-                MavenCoordDTO mavenCoordDTO = new MavenCoordDTO();
-                mavenCoordDTO.setGroupId(values[0]);
-                mavenCoordDTO.setArtifactId(values[1]);
-                mavenCoordDTO.setVersion(values[2]);
-                String applicationInfoKey = values[0] + "." + values[1];
-                String jarInfoKey = applicationInfoKey + "." + values[2];
+                MavenCoordDTO mavenCoordDTO = MavenCoordDTO.builder()
+                        .applicationName(values[0])
+                        .groupId(values[1])
+                        .artifactId(values[2])
+                        .version(values[3])
+                        .build();
+                String applicationInfoKey = values[1] + "." + values[2];
+                String jarInfoKey = applicationInfoKey + "." + values[3];
                 applicationInfos.put(applicationInfoKey, mavenCoordDTO);
                 jarInfos.put(jarInfoKey, mavenCoordDTO);
             }
