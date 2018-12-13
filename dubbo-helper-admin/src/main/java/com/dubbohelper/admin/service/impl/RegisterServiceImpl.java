@@ -54,7 +54,7 @@ public class RegisterServiceImpl implements RegisterService {
     public void reConnection(String zkUrl) throws Exception {
         config.setDubboUrl(zkUrl);
         registerServiceSync.conn();
-        registerServiceSync.initAppList();
+//        registerServiceSync.initAppList();
         registerServiceSync.listener();
     }
 }

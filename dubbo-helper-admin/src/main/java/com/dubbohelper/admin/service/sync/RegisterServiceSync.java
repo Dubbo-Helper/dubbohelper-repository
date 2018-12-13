@@ -55,7 +55,7 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
             return;
         }
 
-        initAppList();
+//        initAppList();
 
         listener();
     }
