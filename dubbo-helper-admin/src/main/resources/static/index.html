@@ -26,21 +26,20 @@
     	<el-col :span="14" :offset="5">
     		<el-autocomplete  v-model="state4"  :fetch-suggestions="querySearchAsync"  placeholder="请输入内容" suffix-icon="el-icon-search"	
   @select="handleSelect">
-	<template slot-scope="{ item }">
+				<template slot-scope="{ item }">
     <div class="name">
 		<span style="float: left">{{ item.appName }}</span>
       <span style="float: right; color: #8492a6; font-size: 13px">
-				
 				<el-badge class="item">
-					<a href="download.html"  style="color:black;text-decoration:none;">
+					<a :href="'download.html?appName='+item.appName+'&groupId='+item.groupId+'artifactId'+item.artifactId" style="color:black;text-decoration:none;">
 						<el-button size="small">Jump to</el-button>
 					</a>
 				</el-badge>
 				</span>
 		</div>
   </template>
-			<el-button slot="append" icon="el-icon-search"><a href="download.html" style="color:black;text-decoration:none;">搜索</a></el-button>
-	</el-autocomplete>
+				<!--<el-button slot="append" icon="el-icon-search"><a href="download.html" style="color:black;text-decoration:none;">搜索</a></el-button>-->
+			</el-autocomplete>
     	</el-col>
     </el-row>
 	
