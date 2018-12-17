@@ -6,7 +6,7 @@
 		<title>添加jar包</title>
 	</head>
 	<body>
-		<div id="download">
+		<div id="app">
 			<el-row >
 				<el-col :span="4" :offset="4">
 					<el-input v-model="groupId" size="medium" placeholder="groupId"></el-input>
@@ -50,11 +50,18 @@
 		
 	</body>
 	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<script src="https://unpkg.com/vue-router/dist/vue-router.min.js"></script>
 	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
 	<script type="text/javascript">
+        var router = new VueRouter({
+            mode: 'history',
+            routes: []
+        });
 	    const vm = new Vue({
-	        el: '#download',
+            router,
+	        el: '#app',
 	        data() {
+
 	            return {
 	            tableData: [{
 	            	name: 'java-jinrong-cashloan-api.jar'
@@ -64,11 +71,15 @@
 	            	name: 'java-jinrong-cashloan-api.jar'
 	            }, {
 	            	name: 'java-jinrong-cashloan-api.jar'
-	            }]
+	            }],
+				groupId:"",
+				artifactId:"",
+				version:""
 	            };
 	        },
 	        created() {
-	            
+                this.groupId = this.$route.query.groupId
+                this.artifactId=this.$route.query.artifactId
 	        },
 	        methods: {                  }
 	    })
