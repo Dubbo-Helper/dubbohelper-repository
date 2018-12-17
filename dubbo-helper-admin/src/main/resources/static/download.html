@@ -16,10 +16,10 @@
 					<el-input v-model="artifactId" size="medium" placeholder="artifactId"></el-input>
 				</el-col>
 				<el-col :span="4" >
-					<el-input v-model="vrsion" size="medium" placeholder="vrsion"></el-input>
+					<el-input v-model="version" size="medium" placeholder="version"></el-input>
 				</el-col>
 				<el-col :span="4">
-					<el-button round>添加</el-button>
+					<el-button @click="selectJarVersions">添加</el-button>
 				</el-col>
 			</el-row>
 			<el-row>
@@ -52,6 +52,7 @@
 	<script src="https://unpkg.com/vue/dist/vue.js"></script>
 	<script src="https://unpkg.com/vue-router/dist/vue-router.min.js"></script>
 	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+	<script src="js/axios.min.js"></script>
 	<script type="text/javascript">
         var router = new VueRouter({
             mode: 'history',
@@ -78,16 +79,28 @@
 	            };
 	        },
 	        created() {
-                this.groupId = this.$route.query.groupId
-                this.artifactId=this.$route.query.artifactId
+                this.groupId = this.$route.query.groupId;
+                this.artifactId=this.$route.query.artifactId;
+                this.selectJarVersions();
 	        },
-	        methods: {                  }
+	        methods: {
+                selectJarVersions(){
+                    var params={'groupId':this.groupId,'artifactId':this.artifactId};
+                    axios.post('/index/getJarVersions',params)
+                        .then(response => {
+                            // cb(response.data);// callback返回数据
+                        })
+                        .catch(error => {
+                            this.$message.error("异常");
+                        });
+                }
+			}
 	    })
 	</script>
 	<style>
 		.el-col {
 		border-radius: 4px;
-		padding 20px 0;
+		padding: 20px 0;
 		
 		}
 		 .el-row {
