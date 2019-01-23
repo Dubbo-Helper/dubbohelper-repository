@@ -2,12 +2,14 @@ package com.dubbohelper.admin.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.util.StringUtils;
 
 @Setter
 @Getter
 @Builder
+@NoArgsConstructor
 public class MavenCoordDTO implements Comparable<MavenCoordDTO> {
 
     /**
