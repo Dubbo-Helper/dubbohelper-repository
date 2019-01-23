@@ -82,8 +82,8 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
                     delete(path);
                 }
             }
-            log.info("事件类型：{}", event.getType());
-            log.info("路径:{}", (null != event.getData() ? URLDecoder.decode(event.getData().getPath()) : null));
+            log.debug("事件类型：{}", event.getType());
+            log.debug("路径:{}", (null != event.getData() ? URLDecoder.decode(event.getData().getPath()) : null));
 
         };
 
