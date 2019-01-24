@@ -1,5 +1,6 @@
 package com.dubbohelper.admin.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.TreeSet;
 @Setter
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Application implements Serializable, Comparable<Application> {
     /**
      * 应用名

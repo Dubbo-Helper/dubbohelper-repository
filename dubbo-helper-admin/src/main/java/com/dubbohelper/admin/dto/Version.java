@@ -1,5 +1,6 @@
 package com.dubbohelper.admin.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.List;
 @Setter
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Version implements Comparable<Version> {
 
     /**
