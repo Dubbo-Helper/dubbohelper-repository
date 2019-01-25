@@ -8,9 +8,11 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,8 +45,13 @@ public class IndexController implements InitializingBean {
     }
 
     @RequestMapping("/getJarVersions")
+    @ResponseBody
     public List<String> getJarVersions(@RequestBody @Valid MavenCoordDTO dto) {
-        return jarService.getJarVersions(dto);
+        //return jarService.getJarVersions(dto);
+        List<String> list =new ArrayList<>();
+        list.add("1.1.0");
+
+        return list;
     }
 
     @Override

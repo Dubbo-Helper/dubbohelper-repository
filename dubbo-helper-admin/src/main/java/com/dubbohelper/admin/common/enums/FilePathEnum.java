@@ -10,7 +10,7 @@ public enum FilePathEnum {
     /**
      * 系统配置文件
      */
-    CONFIGURE(".dubbohelper/config/configure.txt", "系统配置文件"),
+    CONFIGURE(".dubbohelper/config/config.json", "系统配置文件"),
     /**
      * jar包存放路径
      */
@@ -46,7 +46,7 @@ public enum FilePathEnum {
      * @return 绝对路径
      */
     public String getAbsolutePath() {
-        return System.getProperty("user.dir") + File.separator + getRelativePath();
+        return System.getProperty("user.home") + File.separator + getRelativePath();
     }
 
 }

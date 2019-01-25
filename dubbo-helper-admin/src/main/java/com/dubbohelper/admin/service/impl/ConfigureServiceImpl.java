@@ -22,8 +22,8 @@ public class ConfigureServiceImpl implements ConfigureService {
         if (StringUtils.isNotEmpty(dto.getZkAddress())) {
             configureMap.put("zkAddress", dto.getZkAddress());
         }
-        if (StringUtils.isNotEmpty(dto.getRepositoryPath())) {
-            configureMap.put("repositoryPath", dto.getRepositoryPath());
+        if (StringUtils.isNotEmpty(dto.getRepositoryUrl())) {
+            configureMap.put("repositoryUrl", dto.getRepositoryUrl());
         }
 
         return FileUtil.createFile(FilePathEnum.CONFIGURE.getAbsolutePath(), new Gson().toJson(configureMap));
@@ -34,17 +34,26 @@ public class ConfigureServiceImpl implements ConfigureService {
         ConfigureDTO configureDTO = new ConfigureDTO();
 
         if (StringUtils.isEmpty(configureMap.get("zkAddress"))
-                || StringUtils.isEmpty(configureMap.get("repositoryPath"))) {
+                || StringUtils.isEmpty(configureMap.get("repositoryUrl"))) {
             String configure = FileUtil.readFileByString(FilePathEnum.CONFIGURE.getAbsolutePath());
+            if(null==configure){//创建一个默认的配置文件
+                configureDTO.setZkAddress("dubbo.helper.zk.address:2181");
+                configureDTO.setRepositoryUrl("http://nexus.test.com/repository/public/");
+                boolean initConfigFileResult=updateConfigures(configureDTO);
+                if(initConfigFileResult){
+                    configure = FileUtil.readFileByString(FilePathEnum.CONFIGURE.getAbsolutePath());
+                }
+            }
+
             if (StringUtils.isNotEmpty(configure)) {
                 Map<String, String> map = new Gson().fromJson(configure, Map.class);
                 configureMap.put("zkAddress", map.get("zkAddress"));
-                configureMap.put("repositoryPath", map.get("repositoryPath"));
+                configureMap.put("repositoryUrl", map.get("repositoryUrl"));
             }
         }
 
         configureDTO.setZkAddress(configureMap.get("zkAddress"));
-        configureDTO.setRepositoryPath(configureMap.get("repositoryPath"));
+        configureDTO.setRepositoryUrl(configureMap.get("repositoryUrl"));
 
         return configureDTO;
     }

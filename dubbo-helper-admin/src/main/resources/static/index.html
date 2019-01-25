@@ -14,59 +14,26 @@
     <el-row >
         <el-col :span="12" :offset="8"><div style="text-align:center"><span ><img src="img/logo.jpg" class="image"/></span></div></el-col>
     </el-row>
-    <!-- <el-row>
-    	<el-col :span="14" :offset="5">
-    		<el-input placeholder="请输入内容" class="input-with-select">
-    				
-    				<el-button slot="append" icon="el-icon-search"><a href="search.html" style="color:black;text-decoration:none;">搜索</a></el-button>
-    		</el-input>
-    	</el-col>
-    </el-row> -->
     <el-row>
     	<el-col :span="14" :offset="5">
-    		<el-autocomplete  v-model="state4"  :fetch-suggestions="querySearchAsync"  placeholder="请输入内容" suffix-icon="el-icon-search"	
-  @select="handleSelect">
+    		<el-autocomplete  v-model="state4"  :fetch-suggestions="querySearchAsync"  placeholder="请输入内容" suffix-icon="el-icon-search" @select="handleSelect">
 				<template slot-scope="{ item }">
-    <div class="name">
-		<span style="float: left">{{ item.appName }}</span>
-      <span style="float: right; color: #8492a6; font-size: 13px">
-				<el-badge class="item">
-					<a :href="'download.html?appName='+item.appName+'&groupId='+item.groupId+'&artifactId='+item.artifactId" style="color:black;text-decoration:none;">
-						<el-button size="small">Jump to</el-button>
-					</a>
-				</el-badge>
-				</span>
-		</div>
-  </template>
+					<div class="name">
+						<span style="float: left">{{ item.applicationName }}</span>
+						<span style="float: right; color: #8492a6; font-size: 13px">
+							<el-badge class="item">
+								<a :href="'interface.html?applicationName='+item.applicationName+'&groupId='+item.groupId+'&artifactId='+item.artifactId" style="color:black;text-decoration:none;">
+									<el-button size="small">Jump to</el-button>
+								</a>
+							</el-badge>
+						</span>
+					</div>
+  				</template>
 				<!--<el-button slot="append" icon="el-icon-search"><a href="download.html" style="color:black;text-decoration:none;">搜索</a></el-button>-->
 			</el-autocomplete>
     	</el-col>
     </el-row>
-	
-      <!-- <el-row :gutter="20">
-        <el-col :span="8" :offset="4" ><div style="text-align:center;border:1px solid  #99a9bf;">
-            <el-table
-            :data="tableData1"
-            style="width: 100%">
-            <el-table-column      label="我的收藏"        prop="name"              >
-							<template slot-scope="scope">
-								<a href="interface.html" style="color:black;text-decoration:none;">{{scope.row.name}}</a>
-							</template>
-            </el-table-column>
-          </el-table>
-        
-        </div></el-col>
-        <el-col :span="8" ><div style="text-align:center;border:1px solid  #99a9bf;">
-            <el-table
-            :data="tableData2"
-            style="width: 100%">
-            <el-table-column        label="最近浏览"      prop="name">
-							<template slot-scope="scope">
-								<a href="interface.html" style="color:black;text-decoration:none;">{{scope.row.name}}</a>
-							</template>
-            </el-table-column>
-          </el-table></div></el-col>
-    </el-row> -->
+
 </div>
 </body>
 <script src="https://unpkg.com/vue/dist/vue.js"></script>
@@ -77,16 +44,17 @@
     const vm = new Vue({
         el: '#app',
         data() {
-		return { 		state4:'',
-                		restaurants: []
-						};
+			return {
+				state4:'',
+				restaurants: []
+			};
         },
         created() {
             this.loadAll();
         },
     methods: {
-      loadAll() {
-        return [{"appName":"java-jinrong-cashloan-web","groupId":"com.zbj.finance.cashloan","artifactId":"java-jinrong-cashloan-api"}];
+      loadAll() {//从本地cookie中读取最近访问的
+        return [{"applicationName":"java-jinrong-cashloan-web","groupId":"com.zbj.finance.cashloan","artifactId":"java-jinrong-cashloan-api"}];
       },
       querySearchAsync(queryString, cb) {
           queryString ? this.createStateFilter(queryString,cb) : cb(this.restaurants);
@@ -108,6 +76,7 @@
       this.restaurants = this.loadAll();
     }
     })
+
 </script>
 <style>
 	.el-col {

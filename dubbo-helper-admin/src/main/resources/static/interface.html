@@ -6,6 +6,7 @@
 		<link rel="stylesheet" href="css/interface.css">
 		<title>接口列表</title>
 	</head>
+	<script src="js/utils.js"></script>
 	<body>
 		<div id="app" style="width: 80%; margin:0 auto;">
 			<el-container width="80%">
@@ -16,36 +17,19 @@
 					<el-col :span="23"><div class="grid-content bg-content">
 					<el-card class="box-card">
 						<div slot="header" class="clearfix" style="position:relative;">
-							<span style="float: left;">服务名</span>
-							<span style="position:absolute;top:-15px;left:70px;width:200px;">
-							<el-select v-model="selectValue" placeholder="请选择">
-								<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
-								</el-option>
-							</el-select>
+							<span style="float: left;">服务列表</span>
+							<span style="position:absolute;top:-15px;left:150px;width:auto;">
+								<el-select v-model="selectValue" placeholder="请选择">
+									<el-option v-for="item in options" :key="item" :label="item" :value="item">
+									</el-option>
+								</el-select>
 							</span>
-							<!-- <el-row>
-								  <el-col :span="10" :offset="12">
-										<span class="demonstration">xx.jar</span>
-										<el-dropdown>
-											<span class="el-dropdown-link">
-												API版本<i class="el-icon-arrow-down el-icon--right"></i>
-											</span>
-											<el-dropdown-menu slot="dropdown">
-												<el-dropdown-item>xx.jar</el-dropdown-item>
-												<el-dropdown-item>xx.jar</el-dropdown-item>
-												<el-dropdown-item>xx.jar</el-dropdown-item>
-												<el-dropdown-item>xx.jar</el-dropdown-item>
-												<el-dropdown-item>xx.jar</el-dropdown-item>
-											</el-dropdown-menu>
-										</el-dropdown>
-									</el-col>
-									</el-row> -->
 						</div>
-							<el-table :data="tableData" :show-header="false" style="width: 100%">
+							<el-table :data="serviceList" :show-header="false" style="width: 100%">
 							<el-table-column 		 prop="data"	>
 								<template slot-scope="scope">
-									<p>{{ scope.row.index }}.{{ scope.row.name }}</p>
-									<a href="#"  style="color:black;text-decoration:none;">{{ scope.row.url }}</a>
+									<p>{{ scope.row.index }}.{{ scope.row.desc }}</p>
+									<a :href="'javascript:gotoUrl(\''+ scope.row.className +'\')'"  style="color:black;text-decoration:none;">{{ scope.row.className }}</a>
 									</template>
 							</el-table-column>
 						</el-table>
@@ -56,13 +40,13 @@
 					<el-col :span="23" ><div class="grid-content bg-content">
 					<el-card class="box-card">
 						<div slot="header" class="clearfix">
-							<span>方法名</span>
+							<span>方法列表</span>
 						</div>
-							<el-table :data="tableData2" :show-header="false" style="width: 100%">
+							<el-table :data="interfaceList" :show-header="false" style="width: 100%">
 								<el-table-column 		 prop="data"	>
 									<template slot-scope="scope">
-										<p>{{ scope.row.index }}.{{ scope.row.name }}</p>
-										<a href="#"  style="color:black;text-decoration:none;">{{ scope.row.url }}</a>
+										<p>{{ scope.row.index }}.{{ scope.row.desc }}</p>
+										<a :href="'javascript:gotoUrl(\''+ scope.row.className +'\',\''+ scope.row.methodName +'\')'"  style="color:black;text-decoration:none;">{{ scope.row.methodName }}</a>
 										</template>
 								</el-table-column>
 							</el-table>
@@ -72,15 +56,15 @@
 				</el-aside>
 				<el-container>
 				<el-main >
-					<el-card class="box-card">
+					<el-card class="box-card" :data="interfaceInfo">
 						<div slot="header" class="clearfix">
 							<span>接口信息</span>
 						</div>
 							<el-row >
-									<el-col :span="4"><span class="fontSpan">接口名称</span></el-col>
+									<el-col :span="100"><span class="fontSpan">接口名称:{{ interfaceInfo.desc }}</span></el-col>
 							</el-row>
 							<el-row >
-									<el-col :span="4"><span class="fontSpan" >方法名</span></el-col>
+									<el-col :span="4"><span class="fontSpan" >方法名:{{ interfaceInfo.methodName }}</span></el-col>
 							</el-row>
 							<el-row >
 									<el-col :span="4"><span class="fontSpan" >用法</span></el-col>
@@ -89,41 +73,30 @@
 									<el-col :span="4"><a href="checkout.html" style="text-decoration:none;"><span>测试一把<span></a></el-col>
 							</el-row>
 							<el-row >
-									<el-col :span="4"><span class="fontSpan" >请求要数（）</span></el-col>
+									<el-col :span="4"><span class="fontSpan" >请求参数：{{ interfaceInfo.requestName }}</span></el-col>
 							</el-row>
 								<el-row :gutter="20">
 									<el-col :span="24" ><div style="text-align:center;border:1px solid  #99a9bf;">
-											<el-table :data="tableData3" style="width: 100%">
-											<el-table-column      label="参数名称"        prop="name"              >
-											</el-table-column>
-											<el-table-column      label="参数类型"        prop="name"              >
-											</el-table-column>
-											<el-table-column      label="必输"        prop="name"              >
-											</el-table-column>
-											<el-table-column      label="参数描述"        prop="name"              >
-											</el-table-column>
-											<el-table-column      label="字典描述"        prop="name"              >
-											</el-table-column>
+											<el-table :data="requestData" style="width: 100%">
+											<el-table-column      label="参数名称"        prop="name"></el-table-column>
+											<el-table-column      label="参数类型"        prop="dataType"></el-table-column>
+											<el-table-column      label="必输"        	prop="required"></el-table-column>
+											<el-table-column      label="参数描述"        prop="desc"></el-table-column>
+											<el-table-column      label="字典描述"        prop="enumDesc"></el-table-column>
 										</el-table>
-									
 									</div></el-col>
 							</el-row>
 							<el-row >
-									<el-col :span="4"><span class="fontSpan">应答要素（）</span></el-col>
+									<el-col :span="4"><span class="fontSpan">应答参数：{{ interfaceInfo.responseName }}</span></el-col>
 							</el-row>
 								<el-row :gutter="20">
 									<el-col :span="24" ><div style="text-align:center;border:1px solid  #99a9bf;">
-											<el-table :data="tableData4" style="width: 100%">
-											<el-table-column      label="参数名称"        prop="name"              >
-											</el-table-column>
-											<el-table-column      label="参数类型"        prop="name"              >
-											</el-table-column>
-											<el-table-column      label="必输"        prop="name"              >
-											</el-table-column>
-											<el-table-column      label="参数描述"        prop="name"              >
-											</el-table-column>
-											<el-table-column      label="字典描述"        prop="name"              >
-											</el-table-column>
+											<el-table :data="responseData" style="width: 100%">
+											<el-table-column      label="参数名称"        prop="name"></el-table-column>
+											<el-table-column      label="参数类型"        prop="dataType"></el-table-column>
+											<el-table-column      label="必输"        prop="required"></el-table-column>
+											<el-table-column      label="参数描述"        prop="desc"></el-table-column>
+											<el-table-column      label="字典描述"        prop="enumDesc"></el-table-column>
 										</el-table>
 									</div></el-col>
 							</el-row>
@@ -135,51 +108,107 @@
 		</div>
 	</body>
 	<script src="//unpkg.com/vue/dist/vue.js"></script>
-<script src="//unpkg.com/element-ui@2.4.11/lib/index.js"></script>
-		<script type="text/javascript">
-			const vm = new Vue({
-				el: '#app',
-				data() {
-					return {
-	            tableData: [{
-	            	name: '账户相关接口',
-								url: 'com.zbj.finance.cashloan.api.service.AccountService'
-	            },{
-	            	name: '活动相关接口',
-								url: 'com.zbj.finance.cashloan.api.service.ActivityService'
-	            }],
-							tableData2: [{
-								name: '查询余额',
-								url: 'queryBalance'
-							},{
-								name: '查询账户流水',
-								url: 'queryCashFlow'
-							}],
-							options: [{
-          value: '选项1',
-          label: 'xxx.jar'
-        }, {
-          value: '选项2',
-          label: 'xxx.jar'
-        }, {
-          value: '选项3',
-          label: 'xxx.jar'
-        }, {
-          value: '选项4',
-          label: 'xxx.jar'
-        }, {
-          value: '选项5',
-          label: 'xxx.jar'
-        }],
-				selectValue:''
-	            };
-				},
-				created() {
-					
-				},
-				methods: {                  }
-			})
-		</script>
+	<script src="//unpkg.com/vue-router/dist/vue-router.js"></script>
+	<script src="//unpkg.com/element-ui@2.4.11/lib/index.js"></script>
+	<script src="js/axios.min.js"></script>
+	<script type="text/javascript">
+		var appInfo = {};
+		appInfo.applicationName=getUrlKey("applicationName");
+		appInfo.groupId=getUrlKey("groupId");
+		appInfo.artifactId=getUrlKey("artifactId")
+		appInfo.version=getUrlKey("version");
+		urlService= getUrlKey("service");
+		urlMethod= getUrlKey("method");
+
+		function gotoUrl(service,method){
+			//alert(service)
+			url ="interface.html?a=1";
+			if(appInfo.applicationName){
+				url=url+"&applicationName="+appInfo.applicationName;
+			}
+			if(appInfo.groupId){
+				url=url+"&groupId="+appInfo.groupId;
+			}
+			if(appInfo.artifactId){
+				url=url+"&artifactId="+appInfo.artifactId;
+			}
+			if(appInfo.version){
+				url=url+"&version="+appInfo.version;
+			}
+			if(service){
+				url=url+"&service="+service;
+			}
+
+			if(method){
+				url=url+"&method="+method;
+			}
+
+			location.href=url;
+		}
+
+		const vm = new Vue({
+			el: '#app',
+			data:{
+				serviceList: [],
+				interfaceList: [],
+				interfaceInfo:{},
+				requestData: [],
+				responseData: [],
+				options: [],
+				selectValue:appInfo.version
+			},
+			created: {
+
+			},
+			methods: {
+				getDoc(){
+					extVar="?1=1";
+					if(urlService){
+						extVar=extVar+"&service="+urlService;
+					}
+					if(urlMethod){
+						extVar=extVar+"&method="+urlMethod;
+					}
+
+					axios.post('/apiDoc/document'+extVar,
+							appInfo
+						).then(response => {
+							this.serviceList=response.data.serviceList;
+							if(response.data.interfaceList){
+								this.interfaceList=response.data.interfaceList;
+							}
+							if(response.data.interfaceInfo){
+								this.interfaceInfo=response.data.interfaceInfo;
+								this.requestData=this.interfaceInfo.request;
+								this.responseData=this.interfaceInfo.response;
+							}
+
+							console.log(response.data)
+							})
+						.catch(error => {
+								console.log(response.data)
+						});
+				}
+			},
+			mounted(){
+				if(!appInfo.version){
+					axios.post('/index/getJarVersions',
+							appInfo
+					).then(response => {
+						appInfo.version = response.data[0];
+					this.options=response.data;
+					this.getDoc();
+					console.log(response.data);
+				})
+				.catch(error => {
+						console.log(response.data)
+				});
+				}else {
+					this.getDoc();
+				}
+			}
+		})
+	</script>
 		<style>
 			.el-header{
 			background-color: #B3C0D1;

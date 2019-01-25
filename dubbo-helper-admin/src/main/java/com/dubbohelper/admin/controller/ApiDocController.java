@@ -5,20 +5,20 @@ import com.dubbohelper.admin.scanner.ApiDocScanner;
 import com.dubbohelper.admin.scanner.InterfaceInfo;
 import com.dubbohelper.admin.scanner.ServiceInfo;
 import com.dubbohelper.admin.service.ApiDocService;
-import com.dubbohelper.admin.common.util.ModelUtil;
-import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -31,44 +31,50 @@ public class ApiDocController {
     private ApiDocService apiDocService;
 
     @RequestMapping("/service")
-    public ModelAndView listServices(@RequestBody MavenCoordDTO dto) throws Exception {
+    @ResponseBody
+    public Map<String ,Object>  listServices(@RequestBody MavenCoordDTO dto) throws Exception {
+        Map<String ,Object> map = new HashedMap();
         List<ServiceInfo> serviceList = apiDocService.listService(dto);
 
-        new Gson().toJson(serviceList);
-        ModelAndView modelAndView = new ModelAndView("apiDoc");
-        modelAndView.addObject("packageName", dto.getArtifactId());
         InterfaceInfo currentInterfaceInfo = new InterfaceInfo();
-        ModelUtil.getModel(modelAndView, serviceList, null, currentInterfaceInfo, null, null);
+        map.put("packageName", dto.getArtifactId());
+        map.put("serviceList",serviceList);
+        map.put("currentInterfaceInfo",currentInterfaceInfo);
 
-        return modelAndView;
+        return map;
     }
 
     @RequestMapping("/method")
-    public ModelAndView listInterfaces(@RequestBody MavenCoordDTO dto, String service) throws Exception {
+    @ResponseBody
+    public Map<String ,Object>  listInterfaces(@RequestBody MavenCoordDTO dto, String service) throws Exception {
+        Map<String ,Object> map = new HashedMap();
         List<ServiceInfo> serviceList = apiDocService.listService(dto);
         List<InterfaceInfo> interfaceList = apiDocService.listInterface(dto, service);
 
-        ModelAndView modelAndView = new ModelAndView("apiDoc");
-        modelAndView.addObject("packageName", dto.getArtifactId());
         InterfaceInfo currentInterfaceInfo = new InterfaceInfo();
         currentInterfaceInfo.setClassName(service);
-        ModelUtil.getModel(modelAndView, serviceList, interfaceList, currentInterfaceInfo, null, null);
+        map.put("packageName", dto.getArtifactId());
+        map.put("serviceList",serviceList);
+        map.put("interfaceList",interfaceList);
+        map.put("currentInterfaceInfo",currentInterfaceInfo);
 
-        return modelAndView;
+        return map;
     }
 
     @RequestMapping("/document")
-    public ModelAndView listInterface(@RequestBody MavenCoordDTO dto, String service, String method) throws Exception {
-
+    @ResponseBody
+    public Map<String ,Object> listInterface(@RequestBody MavenCoordDTO dto, String service, String method) throws Exception {
+        Map<String ,Object> map = new HashedMap();
         List<ServiceInfo> serviceList = apiDocService.listService(dto);
         List<InterfaceInfo> interfaceList = apiDocService.listInterface(dto, service);
         InterfaceInfo interfaceInfo = apiDocService.interfaceDetail(dto, service, method);
 
-        ModelAndView modelAndView = new ModelAndView("apiDoc");
-        modelAndView.addObject("packageName", dto.getArtifactId());
-        ModelUtil.getModel(modelAndView, serviceList, interfaceList, interfaceInfo, interfaceInfo.getRequest(), interfaceInfo.getResponse());
+        map.put("packageName", dto.getArtifactId());
+        map.put("serviceList",serviceList);
+        map.put("interfaceList",interfaceList);
+        map.put("interfaceInfo",interfaceInfo);
 
-        return modelAndView;
+        return map;
     }
 
     @RequestMapping("downloadApiDoc")

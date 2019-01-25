@@ -18,7 +18,7 @@ public class SearchAppResDTO {
     /**
      * 项目名
      */
-    String appName;
+    String applicationName;
 
     /**
      * 坐标1

@@ -18,21 +18,15 @@ public class DocController {
     public List<SearchAppResDTO> search(@PathVariable String keyWord) {
         List<SearchAppResDTO> list = new ArrayList<>();
         SearchAppResDTO dto1 = SearchAppResDTO.builder()
-                .appName("java-jinrong-cashloan-web")
-                .groupId("com.zbj.finance.cashloan")
-                .artifactId("java-jinrong-cashloan-api")
+                .applicationName("dubbohelper")
+                .groupId("com.dubbohelper.test.api")
+                .artifactId("java-dubbohelper-test-api")
                 .build();
         boolean add = list.add(dto1);
 
-        SearchAppResDTO dto2 = SearchAppResDTO.builder()
-                .appName("java-jinrong-cashloan-web")
-                .groupId("com.zbj.finance.cashloan")
-                .artifactId("java-jinrong-cashloanmgmt-api")
-                .build();
-        list.add(dto2);
 
         SearchAppResDTO dto3 = SearchAppResDTO.builder()
-                .appName("java-jinrong-memcenter-dubbo")
+                .applicationName("java-jinrong-memcenter-dubbo")
                 .groupId("com.zbj.finance.member")
                 .artifactId("java-jinrong-memcenter-api")
                 .build();

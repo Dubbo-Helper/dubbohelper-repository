@@ -15,5 +15,5 @@ public class ConfigureDTO {
     /**
      * maven仓库地址
      */
-    private String repositoryPath;
+    private String repositoryUrl;
 }

@@ -18,7 +18,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +66,7 @@ public class JarServiceImpl implements JarService {
     public boolean insertOrUpdateJar(MavenCoordDTO dto) {
         MavenDataDTO mavenDataDTO = new MavenDataDTO(dto);
         try {
-            mavenDataDTO.setRepository(configureService.getConfigures().getRepositoryPath());
+            mavenDataDTO.setRepository(configureService.getConfigures().getRepositoryUrl());
             MavenUtil.downLoad(mavenDataDTO);
         } catch (ArtifactResolutionException e) {
             log.error("拉取jar包失败", e);
@@ -101,7 +100,7 @@ public class JarServiceImpl implements JarService {
         List<String> result = new ArrayList<>();
 
         MavenDataDTO mavenDataDTO = new MavenDataDTO(dto);
-        mavenDataDTO.setRepository(configureService.getConfigures().getRepositoryPath());
+        mavenDataDTO.setRepository(configureService.getConfigures().getRepositoryUrl());
         try {
             List<Version> versions = MavenUtil.getAllVersions(mavenDataDTO);
             if (CollectionUtils.isNotEmpty(versions)) {
