@@ -60,7 +60,7 @@
           queryString ? this.createStateFilter(queryString,cb) : cb(this.restaurants);
       },
       createStateFilter(queryString,cb) {
-			  axios.get('/search/'+queryString)
+			  axios.get('/index/search?artifactId='+queryString)
 				  .then(response => {
 					  cb(response.data);// callback返回数据
 				  })

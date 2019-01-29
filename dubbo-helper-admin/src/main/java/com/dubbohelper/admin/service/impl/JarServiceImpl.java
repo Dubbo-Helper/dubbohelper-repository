@@ -51,7 +51,7 @@ public class JarServiceImpl implements JarService {
                         MavenCoordDTO mavenCoordDTO = MavenCoordDTO.builder()
                                 .applicationName(dto.getApplicationName())
                                 .groupId(dto.getGroupId())
-                                .artifactId(dto.getArtifactId())
+                                .artifactId(dto.getArtifactId()).version(dto.getVersion())
                                 .build();
                         applications.add(mavenCoordDTO);
                     }

@@ -19,8 +19,8 @@
 						<div slot="header" class="clearfix" style="position:relative;">
 							<span style="float: left;">服务列表</span>
 							<span style="position:absolute;top:-15px;left:150px;width:auto;">
-								<el-select v-model="selectValue" placeholder="请选择">
-									<el-option v-for="item in options" :key="item" :label="item" :value="item">
+								<el-select v-model="selectValue" placeholder="请选择" @change="selectVersion">
+									<el-option v-for="version in versionList" :key="version" :label="version" :value="version">
 									</el-option>
 								</el-select>
 							</span>
@@ -154,7 +154,7 @@
 				interfaceInfo:{},
 				requestData: [],
 				responseData: [],
-				options: [],
+				versionList: [],
 				selectValue:appInfo.version
 			},
 			created: {
@@ -188,6 +188,10 @@
 						.catch(error => {
 								console.log(response.data)
 						});
+				},
+				selectVersion(){
+					appInfo.version=this.selectValue;
+					gotoUrl();
 				}
 			},
 			mounted(){
@@ -196,14 +200,26 @@
 							appInfo
 					).then(response => {
 						appInfo.version = response.data[0];
-					this.options=response.data;
-					this.getDoc();
+						this.versionList=response.data;
+						this.selectValue = appInfo.version;
 					console.log(response.data);
-				})
+
+					this.getDoc();
+					}
+				)
 				.catch(error => {
-						console.log(response.data)
+						console.log(response.data);
 				});
 				}else {
+					axios.post('/index/getJarVersions',appInfo
+					).then(response => {
+						this.versionList=response.data;
+					this.selectValue = appInfo.version;
+						console.log(response.data);
+					}).catch(error => {
+						console.log(response.data);
+					});
+
 					this.getDoc();
 				}
 			}
