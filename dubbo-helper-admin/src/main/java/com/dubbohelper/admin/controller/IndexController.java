@@ -47,10 +47,6 @@ public class IndexController implements InitializingBean {
     @ResponseBody
     public List<String> getJarVersions(@RequestBody @Valid MavenCoordDTO dto) {
         return jarService.getJarVersions(dto);
-//        List<String> list =new ArrayList<>();
-//        list.add("1.1.0");
-//
-//        return list;
     }
 
     @Override

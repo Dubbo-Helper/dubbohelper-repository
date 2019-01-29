@@ -5,6 +5,7 @@ import com.dubbohelper.admin.scanner.ApiDocScanner;
 import com.dubbohelper.admin.scanner.InterfaceInfo;
 import com.dubbohelper.admin.scanner.ServiceInfo;
 import com.dubbohelper.admin.service.ApiDocService;
+import com.dubbohelper.admin.service.JarService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,8 @@ public class ApiDocController {
     private ApiDocScanner apiDocScanner;
     @Autowired
     private ApiDocService apiDocService;
+    @Autowired
+    private JarService jarService;
 
     @RequestMapping("/service")
     @ResponseBody
@@ -65,6 +68,11 @@ public class ApiDocController {
     @ResponseBody
     public Map<String ,Object> listInterface(@RequestBody MavenCoordDTO dto, String service, String method) throws Exception {
         Map<String ,Object> map = new HashedMap();
+        boolean isCached = jarService.isCached(dto);
+        if(!isCached){//如果没有缓存就需要重新下载
+            jarService.insertOrUpdateJar(dto);
+        }
+
         List<ServiceInfo> serviceList = apiDocService.listService(dto);
         List<InterfaceInfo> interfaceList = apiDocService.listInterface(dto, service);
         InterfaceInfo interfaceInfo = apiDocService.interfaceDetail(dto, service, method);

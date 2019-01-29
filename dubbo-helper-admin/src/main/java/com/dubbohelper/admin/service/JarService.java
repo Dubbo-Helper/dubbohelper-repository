@@ -3,7 +3,6 @@ package com.dubbohelper.admin.service;
 import com.dubbohelper.admin.dto.MavenCoordDTO;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public interface JarService {
@@ -31,4 +30,11 @@ public interface JarService {
      * @return
      */
     List<String> getJarVersions(MavenCoordDTO dto);
+
+    /**
+     * 查找缓存中是否已经存在
+     * @param dto
+     * @return
+     */
+    boolean isCached(MavenCoordDTO dto);
 }

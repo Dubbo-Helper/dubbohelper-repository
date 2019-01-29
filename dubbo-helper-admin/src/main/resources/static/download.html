@@ -7,19 +7,18 @@
 	</head>
 	<body>
 		<div id="app">
-			<el-row >
+			<el-row  >
+				<el-col :span="4" :offset="4">
+					<el-input v-model="applicationName" size="medium" placeholder="applicationName"></el-input>
+				</el-col>
 				<el-col :span="4" :offset="4">
 					<el-input v-model="groupId" size="medium" placeholder="groupId"></el-input>
 				</el-col>
-				
 				<el-col :span="4">
 					<el-input v-model="artifactId" size="medium" placeholder="artifactId"></el-input>
 				</el-col>
-				<el-col :span="4" >
-					<el-input v-model="version" size="medium" placeholder="version"></el-input>
-				</el-col>
 				<el-col :span="4">
-					<el-button @click="selectJarVersions">添加</el-button>
+					<el-button @click="selectJarVersions">Show Jars</el-button>
 				</el-col>
 			</el-row>
 			<el-row>
@@ -30,15 +29,15 @@
 				<el-col :span="12" :offset="4" >
 					<template>
 					<el-table :data="tableData"  :show-header="false" style="width: 100%">
-					<el-table-column 		 prop="name"	>
+					<el-table-column 		 prop="data"	>
 						<template slot-scope="scope"><a href="interface.html"  style="color:black;text-decoration:none;">
-						{{ scope.row.name }}</a></template>
+						</a>{{ scope.row }}</template>
 					</el-table-column>
 					<el-table-column 		 prop="type" 	>
 						<template slot-scope="scope">
 							<el-button
 							  size="mini"
-							  @click="handleEdit(scope.$index, scope.row)" :loading="true">更新jar</el-button>
+							  @click="handleEdit(scope.row)" >Jump to</el-button>
 								<!-- <el-progress type="circle" :percentage="25"></el-progress> -->
 						</template>						
 					</el-table-column>
@@ -61,24 +60,16 @@
 	    const vm = new Vue({
             router,
 	        el: '#app',
-	        data() {
-
-	            return {
-	            tableData: [{
-	            	name: 'java-jinrong-cashloan-api.jar'
-	            }, {
-	            	name: 'java-jinrong-cashloan-api.jar'
-	            }, {
-	            	name: 'java-jinrong-cashloan-api.jar'
-	            }, {
-	            	name: 'java-jinrong-cashloan-api.jar'
-	            }],
+	        data: {
+	            tableData: [],
+				applicationName:"",
 				groupId:"",
 				artifactId:"",
 				version:""
-	            };
+
 	        },
 	        created() {
+				this.applicationName = this.$route.query.applicationName;
                 this.groupId = this.$route.query.groupId;
                 this.artifactId=this.$route.query.artifactId;
                 this.selectJarVersions();
@@ -89,11 +80,20 @@
                     axios.post('/index/getJarVersions',params)
                         .then(response => {
                             // cb(response.data);// callback返回数据
+						this.tableData = response.data;
                         })
                         .catch(error => {
                             this.$message.error("异常");
                         });
-                }
+                },
+				handleEdit(version){
+					urlParams = "/interface.html?"+"applicationName="+this.applicationName;
+					urlParams = urlParams + "&groupId="+this.groupId;
+					urlParams = urlParams + "&artifactId="+this.artifactId;
+					urlParams = urlParams + "&version="+version;
+
+					location.href = urlParams;
+				}
 			}
 	    })
 	</script>

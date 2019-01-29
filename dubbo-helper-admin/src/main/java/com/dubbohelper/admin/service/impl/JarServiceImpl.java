@@ -115,6 +115,17 @@ public class JarServiceImpl implements JarService {
     }
 
     /**
+     * 查找缓存中是否已经存在
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public boolean isCached(MavenCoordDTO dto) {
+        return applicationInfos.containsKey(dto.getGroupId()+"."+dto.getArtifactId());
+    }
+
+    /**
      * 加载文件内容并缓存
      */
     private void loadJarInfoFile() {

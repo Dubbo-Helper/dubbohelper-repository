@@ -16,15 +16,14 @@
     </el-row>
     <el-row>
     	<el-col :span="14" :offset="5">
-    		<el-autocomplete  v-model="state4"  :fetch-suggestions="querySearchAsync"  placeholder="请输入内容" suffix-icon="el-icon-search" @select="handleSelect">
+    		<el-autocomplete  v-model="state4"  :fetch-suggestions="querySearchAsync"  placeholder="请输入dubbo application name" suffix-icon="el-icon-search" @select="handleSelect">
 				<template slot-scope="{ item }">
 					<div class="name">
-						<span style="float: left">{{ item.applicationName }}</span>
+						<span style="float: left">{{ item.applicationName }}{{ item.message }}</span>
 						<span style="float: right; color: #8492a6; font-size: 13px">
 							<el-badge class="item">
-								<a :href="'interface.html?applicationName='+item.applicationName+'&groupId='+item.groupId+'&artifactId='+item.artifactId" style="color:black;text-decoration:none;">
-									<el-button size="small">Jump to</el-button>
-								</a>
+								<el-button size="small" >Jump to</el-button>
+
 							</el-badge>
 						</span>
 					</div>
@@ -34,6 +33,12 @@
     	</el-col>
     </el-row>
 
+</div>
+<div>
+	<span style="float: left; width: 250px;color: #8492a6; font-size: 13px">
+		<el-input v-model="groupId" size="medium" placeholder="groupId"></el-input>
+		<el-input v-model="artifactId" size="medium" placeholder="artifactId"></el-input>
+	</span>
 </div>
 </body>
 <script src="https://unpkg.com/vue/dist/vue.js"></script>
@@ -54,7 +59,7 @@
         },
     methods: {
       loadAll() {//从本地cookie中读取最近访问的
-        return [{"applicationName":"java-jinrong-cashloan-web","groupId":"com.zbj.finance.cashloan","artifactId":"java-jinrong-cashloan-api"}];
+        return [{"applicationName":"java-jinrong-cashloan-web","groupId":"com.zbj.finance.cashloan","artifactId":"java-jinrong-cashloan-api",version:"1.0.18"}];
       },
       querySearchAsync(queryString, cb) {
           queryString ? this.createStateFilter(queryString,cb) : cb(this.restaurants);
@@ -62,15 +67,42 @@
       createStateFilter(queryString,cb) {
 			  axios.get('/index/search?artifactId='+queryString)
 				  .then(response => {
-					  cb(response.data);// callback返回数据
+				  		if(response.data.length>0){
+			  cb(response.data);
+		  				}else {
+			  				result = [{message:"未搜索到结果请点击手动添加"}];
+			  cb(result);
+		 				 }
+					  //cb(response.data);// callback返回数据
 				  })
 				  .catch(error => {
 					  this.$message.error("异常");
 				  });
       },
       handleSelect(item) {
-        console.log(item);
+		  urlParams="1=1";
+		  if(item.applicationName){
+			  urlParams = urlParams + "&applicationName="+item.applicationName;
+		  }
+		  if(item.groupId){
+			  urlParams = urlParams + "&groupId="+item.groupId;
+		  }
+		  if(item.artifactId){
+			  urlParams = urlParams + "&artifactId="+item.artifactId;
+		  }
+		  if(item.version){
+			  urlParams = urlParams + "&version="+item.version;
+		  }
+			if(item.groupId && item.artifactId){
+				urlParams = "/interface.html?"+urlParams;
+			}else{
+				urlParams = "/download.html?"+urlParams;
+			}
+
+		  console.log(item);
+		  location.href = urlParams;
       }
+
     },
     mounted() {
       this.restaurants = this.loadAll();
