@@ -48,6 +48,16 @@ public class ApiDocScanner {
         return JAR_ANNOTATION_CACHE.get(key);
     }
 
+    /**
+     * 从缓存中清除
+     * @param dto
+     */
+    public void removeJarAnnotation(MavenCoordDTO dto) {
+        String key = dto.getGroupId() + "." + dto.getArtifactId() + "." + dto.getVersion();
+
+        JAR_ANNOTATION_CACHE.remove(key);
+    }
+
     public synchronized void loadJar(String jarName, MavenCoordDTO dto, String... docScanPackages) {
         if (docScanPackages == null || docScanPackages.length == 0) {
             log.info("docScanPackages is null");

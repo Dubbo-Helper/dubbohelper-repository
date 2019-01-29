@@ -9,21 +9,24 @@
 	<script src="js/utils.js"></script>
 	<body>
 		<div id="app" style="width: 80%; margin:0 auto;">
+				<span >选择版本：
+					<el-select v-model="selectValue" placeholder="请选择" @change="selectVersion">
+						<el-option v-for="version in versionList" :key="version" :label="version" :value="version"></el-option>
+					</el-select>
+					<el-button size="small" v-on:click="removeCache" >拉取最新Jar</el-button>
+					{{ message }}
+				</span>
+
 			<el-container width="80%">
 			  <!-- <el-header>Header</el-header> -->
-			  <el-container>
+
+				<el-container>
 				<el-aside width="35%">
 					<el-row :gutter="20">
 					<el-col :span="23"><div class="grid-content bg-content">
 					<el-card class="box-card">
 						<div slot="header" class="clearfix" style="position:relative;">
 							<span style="float: left;">服务列表</span>
-							<span style="position:absolute;top:-15px;left:150px;width:auto;">
-								<el-select v-model="selectValue" placeholder="请选择" @change="selectVersion">
-									<el-option v-for="version in versionList" :key="version" :label="version" :value="version">
-									</el-option>
-								</el-select>
-							</span>
 						</div>
 							<el-table :data="serviceList" :show-header="false" style="width: 100%">
 							<el-table-column 		 prop="data"	>
@@ -155,7 +158,8 @@
 				requestData: [],
 				responseData: [],
 				versionList: [],
-				selectValue:appInfo.version
+				selectValue:appInfo.version,
+				message:""
 			},
 			created: {
 
@@ -192,6 +196,15 @@
 				selectVersion(){
 					appInfo.version=this.selectValue;
 					gotoUrl();
+				},
+				removeCache(){
+					axios.post('/apiDoc/removeCache', appInfo).then(response => {
+						this.message=response.data;
+						console.log(response.data)
+					})
+					.catch(error => {
+							console.log(response.data)
+					});
 				}
 			},
 			mounted(){

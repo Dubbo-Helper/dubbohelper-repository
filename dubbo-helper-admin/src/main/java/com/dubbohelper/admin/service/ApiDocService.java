@@ -43,6 +43,12 @@ public interface ApiDocService {
     InterfaceInfo interfaceDetail(MavenCoordDTO dto, String className, String methodName);
 
     /**
+     * 从缓存中清除
+     * @param dto
+     */
+    void removeJarAnnotation(MavenCoordDTO dto);
+
+    /**
      * 文件下载
      *
      * @param dto          jar坐标信息

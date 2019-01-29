@@ -70,6 +70,16 @@ public class ApiDocServiceImpl implements ApiDocService {
         return null;
     }
 
+    /**
+     * 从缓存中清除
+     *
+     * @param dto
+     */
+    @Override
+    public void removeJarAnnotation(MavenCoordDTO dto) {
+        scanner.removeJarAnnotation(dto);
+    }
+
     @SneakyThrows
     @Override
     public void downloadApiDoc(MavenCoordDTO dto, String fileName, OutputStream outputStream) {

@@ -64,6 +64,14 @@ public class ApiDocController {
         return map;
     }
 
+    @RequestMapping("/removeCache")
+    @ResponseBody
+    public String removeCache(@RequestBody MavenCoordDTO dto) throws Exception {
+        apiDocService.removeJarAnnotation(dto);
+
+        String message="已经清除缓存，请刷新页面";
+        return message;
+    }
     @RequestMapping("/document")
     @ResponseBody
     public Map<String ,Object> listInterface(@RequestBody MavenCoordDTO dto, String service, String method) throws Exception {
