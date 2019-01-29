@@ -7,13 +7,19 @@ import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.collection.CollectRequest;
+import org.eclipse.aether.collection.DependencyCollectionException;
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
+import org.eclipse.aether.graph.Dependency;
+import org.eclipse.aether.graph.DependencyNode;
 import org.eclipse.aether.impl.DefaultServiceLocator;
 import org.eclipse.aether.repository.Authentication;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.eclipse.aether.resolution.DependencyRequest;
+import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResolutionException;
 import org.eclipse.aether.resolution.VersionRangeResult;
@@ -21,6 +27,7 @@ import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
+import org.eclipse.aether.util.graph.visitor.PreorderNodeListGenerator;
 import org.eclipse.aether.util.repository.AuthenticationBuilder;
 import org.eclipse.aether.version.Version;
 
@@ -93,6 +100,46 @@ public class MavenUtil {
         artifactRequest.addRepository(central);
         artifactRequest.setArtifact(artifact);
         repoSystem.resolveArtifact(session, artifactRequest);
+    }
+
+    /**
+     * 从指定maven地址下载指定jar包和对应的依赖
+     *
+     * @param dto maven-jar包的定位（groupId:artifactId:version)
+     * @throws ArtifactResolutionException,DependencyCollectionException,DependencyResolutionException
+     * @return 所有类路径（classpath）
+     */
+    public static String  downLoadAll(MavenDataDTO dto) throws ArtifactResolutionException,DependencyCollectionException,DependencyResolutionException {
+        String groupId = dto.getGroupId();
+        String artifactId = dto.getArtifactId();
+        String version = dto.getVersion();
+        String repositoryUrl = dto.getRepository();
+        String target = dto.getTarget();
+        String username = dto.getUsername();
+        String password = dto.getPassword();
+
+        RepositorySystem repoSystem = newRepositorySystem();
+        RepositorySystemSession session = newSession( repoSystem ,target);
+
+        Dependency dependency = new Dependency( new DefaultArtifact(groupId + ":" + artifactId + ":" + version), "compile" );
+        RemoteRepository central = null;
+        if (username == null && password == null) {
+            central = new RemoteRepository.Builder("central", "default", repositoryUrl).build();
+        } else {
+            Authentication authentication = new AuthenticationBuilder().addUsername(username).addPassword(password).build();
+            central = new RemoteRepository.Builder("central", "default", repositoryUrl).setAuthentication(authentication).build();
+        }
+        CollectRequest collectRequest = new CollectRequest();
+        collectRequest.setRoot( dependency );
+        collectRequest.addRepository( central );
+        DependencyNode node = repoSystem.collectDependencies( session, collectRequest ).getRoot();
+        DependencyRequest dependencyRequest = new DependencyRequest();
+        dependencyRequest.setRoot( node );
+        repoSystem.resolveDependencies( session, dependencyRequest  );
+        PreorderNodeListGenerator nlg = new PreorderNodeListGenerator();
+        node.accept( nlg );
+
+        return nlg.getClassPath();
     }
 
     /**

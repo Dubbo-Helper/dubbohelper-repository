@@ -26,9 +26,9 @@ public class DocController {
 
 
         SearchAppResDTO dto3 = SearchAppResDTO.builder()
-                .applicationName("java-jinrong-memcenter-dubbo")
-                .groupId("com.zbj.finance.member")
-                .artifactId("java-jinrong-memcenter-api")
+                .applicationName("java-jinrong-cashloan-web")
+                .groupId("com.zbj.finance.cashloan")
+                .artifactId("java-jinrong-cashloan-api")
                 .build();
         list.add(dto3);
         return list;

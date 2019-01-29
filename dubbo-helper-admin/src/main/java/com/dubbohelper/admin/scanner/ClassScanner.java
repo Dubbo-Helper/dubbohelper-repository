@@ -1,9 +1,11 @@
 package com.dubbohelper.admin.scanner;
 
-import com.dubbohelper.common.annotations.ApidocService;
+import com.dubbohelper.admin.common.util.AnnotationUtil;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -20,9 +22,11 @@ import java.util.jar.JarFile;
  * @since 1.0.0
  */
 @Slf4j
+@AllArgsConstructor
 public class ClassScanner {
+    private  URLClassLoader urlClassLoader;
 
-	/**
+    /**
      * 从包package中获取Class
      *
      * @param jarPath jar包文件路径
@@ -58,12 +62,12 @@ public class ClassScanner {
                         // 去掉后面的".class" 获取真正的类名
                         String className = name.substring(packageName.length() + 1, name.length() - 6);
                         try {
-                            URLClassLoader urlClassLoader = new URLClassLoader(new URL[] { classLoaderUrl }, Thread.currentThread().getContextClassLoader());
+                             //urlClassLoader = new URLClassLoader(new URL[] { classLoaderUrl }, Thread.currentThread().getContextClassLoader());
                             // 如果前半部分和定义的包名相同
                             if (name.startsWith(packageDirName)) {
                                 Class<?> cls = urlClassLoader.loadClass(packageName + '.' + className);
                                 if (cls.isInterface()) {
-                                    ApidocService apidocService = cls.getAnnotation(ApidocService.class);
+                                    Annotation apidocService = AnnotationUtil.getAnnotation(cls.getAnnotations(),"ApidocService");
                                     if (apidocService != null) {
                                         classes.add(cls);
                                     } else {

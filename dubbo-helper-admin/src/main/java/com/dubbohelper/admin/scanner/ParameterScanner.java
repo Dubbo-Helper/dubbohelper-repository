@@ -1,17 +1,20 @@
 package com.dubbohelper.admin.scanner;
 
+import com.dubbohelper.admin.common.util.AnnotationUtil;
 import com.dubbohelper.admin.scanner.elementInfo.BeanElementInfo;
 import com.dubbohelper.admin.scanner.elementInfo.ElementInfo;
 import com.dubbohelper.admin.scanner.elementInfo.ListElementInfo;
 import com.dubbohelper.admin.scanner.elementInfo.ValueElementInfo;
-import com.dubbohelper.common.annotations.ApidocElement;
 import com.dubbohelper.common.enums.EnumToString;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,19 +42,32 @@ public class ParameterScanner {
         fieldList.addAll(Arrays.asList(clazz.getDeclaredFields()));
 
         for (Field field : fieldList) {
-            ApidocElement element = field.getAnnotation(ApidocElement.class);
+            //ApidocElement element = field.getAnnotation(ApidocElement.class);
+            Annotation element = AnnotationUtil.getAnnotation(field.getAnnotations(),"ApidocElement");
             String desc = "";
             String version = "";
             if(element != null){
-                desc = element.value();
+                desc = AnnotationUtil.getAnnotationMemberValue(element,"value").toString();
                 version = "1.0";
             }
             ElementInfo elementInfo = null;
+
+            boolean required = false;
+            int minLen = 0;
+            int maxLen = 0;
+            String defVal = "";
+            if(element!=null){
+                 required = (boolean)AnnotationUtil.getAnnotationMemberValue(element,"required");
+                 minLen = (int)AnnotationUtil.getAnnotationMemberValue(element,"minLen");
+                 maxLen = (int)AnnotationUtil.getAnnotationMemberValue(element,"maxLen");
+                 defVal = (String)AnnotationUtil.getAnnotationMemberValue(element,"defVal");
+            }
+
             if (field.getType().isEnum()) {
                 ValueElementInfo valueElementInfo = null;
 
                 if(element != null){
-                    valueElementInfo = new ValueElementInfo(field.getName(), desc,"", field.getType().getSimpleName(), element.required(), element.minLen(), element.maxLen(), element.defVal());
+                    valueElementInfo = new ValueElementInfo(field.getName(), desc,"", field.getType().getSimpleName(),required, minLen, maxLen, defVal);
                 }else{
                     valueElementInfo = new ValueElementInfo(field.getName(), desc, "",field.getType().getSimpleName(), true, 0, 0, "");
                 }
@@ -82,9 +98,21 @@ public class ParameterScanner {
                 }
             } else {
                 List<String> enums = new ArrayList<String>();
-                if (element != null && element.enumClass() != Enum.class) {
-                    if (EnumToString.class.isAssignableFrom(element.enumClass())) {
-                        enums = extractEnum(element.enumClass());
+                Class<?> aClass=null;
+                if(element!=null) {
+                    InvocationHandler invocationHandler = Proxy.getInvocationHandler(element);
+                    try {
+                        Field memberValuesField = invocationHandler.getClass().getDeclaredField("type");
+                        memberValuesField.setAccessible(true);
+                        aClass = (Class) memberValuesField.get(invocationHandler);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (element != null && aClass != Enum.class) {
+                    if (EnumToString.class.isAssignableFrom(aClass)) {
+                        enums = extractEnum(aClass);
                     } else {
                         log.error("{}.{} @ApidocElement(enumClass) 设置的字典枚举无效", clazz.getName(), field.getName());
                     }
@@ -92,7 +120,7 @@ public class ParameterScanner {
                 ValueElementInfo valueElementInfo = null;
 
                 if(element != null){
-                    valueElementInfo = new ValueElementInfo(field.getName(), desc, "",field.getType().getSimpleName(), element.required(), element.minLen(), element.maxLen(), element.defVal());
+                    valueElementInfo = new ValueElementInfo(field.getName(), desc, "",field.getType().getSimpleName(), required, minLen, maxLen, defVal);
                 }else{
                     valueElementInfo = new ValueElementInfo(field.getName(), desc, "",field.getType().getSimpleName(), true, 0, 0, "");
                 }
