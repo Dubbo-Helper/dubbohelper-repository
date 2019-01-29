@@ -9,7 +9,7 @@
 <body style="margin: 0;border: 0;">
 <div id="app">
     <el-row >
-        <el-col :span="4" :offset="18"><div style="text-align:right"><span >配置</span></div></el-col>
+        <el-col :span="4" :offset="18"><div style="text-align:right"><span ><a href="/config.html">配置</a> </span></div></el-col>
     </el-row>
     <el-row >
         <el-col :span="12" :offset="8"><div style="text-align:center"><span ><img src="img/logo.jpg" class="image"/></span></div></el-col>
@@ -55,31 +55,43 @@
 			};
         },
         created() {
+			this.getConfig();
             this.loadAll();
+
         },
     methods: {
-      loadAll() {//从本地cookie中读取最近访问的
-        return [{"applicationName":"java-jinrong-cashloan-web","groupId":"com.zbj.finance.cashloan","artifactId":"java-jinrong-cashloan-api",version:"1.0.18"}];
-      },
-      querySearchAsync(queryString, cb) {
-          queryString ? this.createStateFilter(queryString,cb) : cb(this.restaurants);
-      },
-      createStateFilter(queryString,cb) {
-			  axios.get('/index/search?artifactId='+queryString)
-				  .then(response => {
-				  		if(response.data.length>0){
-			  cb(response.data);
-		  				}else {
-			  				result = [{message:"未搜索到结果请点击手动添加"}];
-			  cb(result);
-		 				 }
-					  //cb(response.data);// callback返回数据
-				  })
-				  .catch(error => {
-					  this.$message.error("异常");
-				  });
-      },
-      handleSelect(item) {
+		getConfig(){
+			axios.post('/config/get').then(response => {
+				if(response.data.zkAddress==null || response.data.repositoryUrl==null){
+					location.href = "/config.html";
+				}
+			}).catch(error => {
+				this.$message.error("检查config异常");
+			});
+		},
+
+		loadAll(){//从本地cookie中读取最近访问的
+			return [{"applicationName":"java-jinrong-cashloan-web","groupId":"com.zbj.finance.cashloan","artifactId":"java-jinrong-cashloan-api",version:"1.0.18"}];
+		},
+
+		querySearchAsync(queryString, cb) {
+		  queryString ? this.createStateFilter(queryString,cb) : cb(this.restaurants);
+		},
+
+      	createStateFilter(queryString,cb) {
+			  axios.get('/index/search?artifactId='+queryString).then(response => {
+				  if(response.data.length>0){
+				cb(response.data);
+				  }else {
+					result = [{message:"未搜索到结果请点击手动添加"}];
+			  	cb(result);
+				  }
+			  }).catch(error => {
+				this.$message.error("异常");
+			  });
+		},
+
+      	handleSelect(item){
 		  urlParams="1=1";
 		  if(item.applicationName){
 			  urlParams = urlParams + "&applicationName="+item.applicationName;
@@ -94,7 +106,7 @@
 			  urlParams = urlParams + "&version="+item.version;
 		  }
 			if(item.groupId && item.artifactId){
-				urlParams = "/interface.html?"+urlParams;
+				urlParams = "/document.html?"+urlParams;
 			}else{
 				urlParams = "/download.html?"+urlParams;
 			}

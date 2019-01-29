@@ -18,7 +18,7 @@
 					<el-input v-model="artifactId" size="medium" placeholder="artifactId"></el-input>
 				</el-col>
 				<el-col :span="4">
-					<el-button @click="selectJarVersions">Show Jars</el-button>
+					<el-button @click="selectJarVersions">Show All Jars</el-button>
 				</el-col>
 			</el-row>
 			<el-row>
@@ -30,7 +30,7 @@
 					<template>
 					<el-table :data="tableData"  :show-header="false" style="width: 100%">
 					<el-table-column 		 prop="data"	>
-						<template slot-scope="scope"><a href="interface.html"  style="color:black;text-decoration:none;">
+						<template slot-scope="scope"><a href="document.html"  style="color:black;text-decoration:none;">
 						</a>{{ scope.row }}</template>
 					</el-table-column>
 					<el-table-column 		 prop="type" 	>
@@ -87,7 +87,7 @@
                         });
                 },
 				handleEdit(version){
-					urlParams = "/interface.html?"+"applicationName="+this.applicationName;
+					urlParams = "/document.html?"+"applicationName="+this.applicationName;
 					urlParams = urlParams + "&groupId="+this.groupId;
 					urlParams = urlParams + "&artifactId="+this.artifactId;
 					urlParams = urlParams + "&version="+version;

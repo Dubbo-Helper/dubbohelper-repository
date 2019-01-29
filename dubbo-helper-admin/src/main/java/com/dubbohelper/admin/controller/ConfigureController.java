@@ -23,7 +23,12 @@ public class ConfigureController {
      */
     @RequestMapping("/get")
     public ConfigureDTO getConfigures() {
-        return configureService.getConfigures();
+        ConfigureDTO dto =  configureService.getConfigures();
+        if(dto==null){
+            dto = new ConfigureDTO();
+        }
+
+        return dto;
     }
 
     /**
@@ -33,7 +38,13 @@ public class ConfigureController {
      * @return 修改结果
      */
     @RequestMapping("/update")
-    public boolean updateConfigures(@RequestBody @Valid ConfigureDTO dto) {
-        return configureService.updateConfigures(dto);
+    public String updateConfigures(@RequestBody @Valid ConfigureDTO dto) {
+        boolean result = configureService.updateConfigures(dto);
+        String message = "保存失败";
+        if(result){
+            message = "保存成功";
+        }
+
+        return message;
     }
 }

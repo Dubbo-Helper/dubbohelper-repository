@@ -189,9 +189,9 @@ public class RegisterServiceSync implements InitializingBean, DisposableBean {
      * 连接zk
      * @throws Exception
      */
-    public void conn() throws Exception {
+    public void conn()  {
         if (StringUtils.isEmpty(configureService.getConfigures().getZkAddress())) {
-            throw new Exception("zk连接地址未设置");
+            throw new RuntimeException("zk连接地址未设置");
         }
         destroy();
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(10000, 3);
