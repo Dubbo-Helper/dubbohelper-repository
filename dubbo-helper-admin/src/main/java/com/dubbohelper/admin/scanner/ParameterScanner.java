@@ -5,16 +5,14 @@ import com.dubbohelper.admin.scanner.elementInfo.BeanElementInfo;
 import com.dubbohelper.admin.scanner.elementInfo.ElementInfo;
 import com.dubbohelper.admin.scanner.elementInfo.ListElementInfo;
 import com.dubbohelper.admin.scanner.elementInfo.ValueElementInfo;
-import com.dubbohelper.common.enums.EnumToString;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,11 +54,13 @@ public class ParameterScanner {
             int minLen = 0;
             int maxLen = 0;
             String defVal = "";
+            Class<?> enumClass=null;
             if(element!=null){
-                 required = (boolean)AnnotationUtil.getAnnotationMemberValue(element,"required");
-                 minLen = (int)AnnotationUtil.getAnnotationMemberValue(element,"minLen");
-                 maxLen = (int)AnnotationUtil.getAnnotationMemberValue(element,"maxLen");
-                 defVal = (String)AnnotationUtil.getAnnotationMemberValue(element,"defVal");
+                required = (boolean)AnnotationUtil.getAnnotationMemberValue(element,"required");
+                minLen = (int)AnnotationUtil.getAnnotationMemberValue(element,"minLen");
+                maxLen = (int)AnnotationUtil.getAnnotationMemberValue(element,"maxLen");
+                defVal = (String)AnnotationUtil.getAnnotationMemberValue(element,"defVal");
+                enumClass = (Class<?>)AnnotationUtil.getAnnotationMemberValue(element,"enumClass");
             }
 
             if (field.getType().isEnum()) {
@@ -98,27 +98,11 @@ public class ParameterScanner {
                 }
             } else {
                 List<String> enums = new ArrayList<String>();
-                Class<?> aClass=null;
-                if(element!=null) {
-                    InvocationHandler invocationHandler = Proxy.getInvocationHandler(element);
-                    try {
-                        Field memberValuesField = invocationHandler.getClass().getDeclaredField("type");
-                        memberValuesField.setAccessible(true);
-                        aClass = (Class) memberValuesField.get(invocationHandler);
+                if (element != null && enumClass != Enum.class && enumClass.isEnum()) {
+                    enums = extractEnum(enumClass);
+                }
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                if (element != null && aClass != Enum.class) {
-                    if (EnumToString.class.isAssignableFrom(aClass)) {
-                        enums = extractEnum(aClass);
-                    } else {
-                        log.error("{}.{} @ApidocElement(enumClass) 设置的字典枚举无效", clazz.getName(), field.getName());
-                    }
-                }
                 ValueElementInfo valueElementInfo = null;
-
                 if(element != null){
                     valueElementInfo = new ValueElementInfo(field.getName(), desc, "",field.getType().getSimpleName(), required, minLen, maxLen, defVal);
                 }else{
@@ -134,18 +118,33 @@ public class ParameterScanner {
 
     /**
      * 解析枚举类
-     * @param enumClass 枚举类
+     * @param clazz 枚举类
      */
-    private List<String> extractEnum(Class<?> enumClass) {
-
-        List<String> list = new ArrayList<String>();
-        Method toString2 = null;
-        try {
-            toString2 = enumClass.getMethod("toString2");
-            list = (List<String>) toString2.invoke(enumClass.newInstance());
-        } catch (Exception e) {
-            return list;
+    private List<String> extractEnum(Class<?> clazz) {
+        List<String> enumConstants = new ArrayList<String>();
+        if(!clazz.isEnum()) {
+            return enumConstants;
         }
-        return list;
+
+        for(Enum en :(Enum[])clazz.getEnumConstants()) {
+            List<String > list =new ArrayList<>();
+            for (int i=0;i<en.getClass().getDeclaredMethods().length;i++) {
+                Method method = en.getClass().getDeclaredMethods()[i];
+                try {
+                    if (method.getParameterCount()==0&&(method.getReturnType().isPrimitive()||method.getReturnType().equals(String.class))) {
+                        list.add(String.valueOf(en.getDeclaringClass().getDeclaredMethod(method.getName()).invoke(en)));
+                    }
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+            }
+            enumConstants.add(en.toString()+list.toString());
+        }
+
+        return enumConstants;
     }
 }
