@@ -83,7 +83,7 @@
 											<el-table :data="requestData" style="width: 100%">
 											<el-table-column      label="参数名称"        prop="name"></el-table-column>
 											<el-table-column      label="参数类型"        prop="dataType"></el-table-column>
-											<el-table-column      label="必输"        	prop="required"></el-table-column>
+											<el-table-column      label="必输"        	prop="required" :formatter="toString"></el-table-column>
 											<el-table-column      label="参数描述"        prop="desc"></el-table-column>
 											<el-table-column      label="字典描述"        prop="enumDesc"></el-table-column>
 										</el-table>
@@ -97,7 +97,7 @@
 											<el-table :data="responseData" style="width: 100%">
 											<el-table-column      label="参数名称"        prop="name"></el-table-column>
 											<el-table-column      label="参数类型"        prop="dataType"></el-table-column>
-											<el-table-column      label="必输"        prop="required"></el-table-column>
+											<el-table-column      label="必输"        prop="required" :formatter="toString"></el-table-column>
 											<el-table-column      label="参数描述"        prop="desc"></el-table-column>
 											<el-table-column      label="字典描述"        prop="enumDesc"></el-table-column>
 										</el-table>
@@ -205,6 +205,13 @@
 					.catch(error => {
 							console.log(response.data)
 					});
+				},
+				toString(row){
+					if(undefined==row.required){
+						return "";
+					}else {
+						return row.required.toString();
+					}
 				}
 			},
 			mounted(){
