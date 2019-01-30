@@ -31,7 +31,7 @@
 							<el-table :data="serviceList" :show-header="false" style="width: 100%">
 							<el-table-column 		 prop="data"	>
 								<template slot-scope="scope">
-									<p>{{ scope.row.index }}.{{ scope.row.desc }}</p>
+									<p>{{ scope.$index+1 }}.{{ scope.row.desc }}</p>
 									<a :href="'javascript:gotoUrl(\''+ scope.row.className +'\')'"  style="color:black;text-decoration:none;">{{ scope.row.className }}</a>
 									</template>
 							</el-table-column>
@@ -48,7 +48,7 @@
 							<el-table :data="interfaceList" :show-header="false" style="width: 100%">
 								<el-table-column 		 prop="data"	>
 									<template slot-scope="scope">
-										<p>{{ scope.row.index }}.{{ scope.row.desc }}</p>
+										<p>{{ scope.$index+1 }}.{{ scope.row.desc }}</p>
 										<a :href="'javascript:gotoUrl(\''+ scope.row.className +'\',\''+ scope.row.methodName +'\')'"  style="color:black;text-decoration:none;">{{ scope.row.methodName }}</a>
 										</template>
 								</el-table-column>
@@ -70,7 +70,7 @@
 									<el-col :span="4"><span class="fontSpan" >方法名:{{ interfaceInfo.methodName }}</span></el-col>
 							</el-row>
 							<el-row >
-									<el-col :span="4"><span class="fontSpan" >用法</span></el-col>
+									<el-col :span="4"><span class="fontSpan" >用法:{{ interfaceInfo.usage }}</span></el-col>
 							</el-row>
 							<el-row >
 									<el-col :span="4"><a href="checkout.html" style="text-decoration:none;"><span>测试一把<span></a></el-col>

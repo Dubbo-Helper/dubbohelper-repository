@@ -71,11 +71,11 @@ public class ApiDocScanner {
         mavenDataDTO.setRepository(configureService.getConfigures().getRepositoryUrl());
         ClassScanner classScanner = null;
         try {
-            //加载类
+            //从maven仓库
             String classPathAll = MavenUtil.downLoadAll(mavenDataDTO);
+            //加载类
             URLClassLoader urlClassLoader = JarsLoandUtil.loanJar(classPathAll.split(":"));
             classScanner = new ClassScanner(urlClassLoader);
-
             for (String docScanPackage : docScanPackages) {
                 Set<Class<?>> apiDocServices = new HashSet<Class<?>>(classScanner.getClasses(jarPath, docScanPackage));
                 log.debug("scan @ApidocService size:{}", apiDocServices.size());
