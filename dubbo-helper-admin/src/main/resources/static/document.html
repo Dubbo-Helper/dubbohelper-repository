@@ -1,284 +1,287 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-		<link rel="stylesheet" href="css/interface.css">
-		<title>接口列表</title>
-	</head>
-	<script src="js/utils.js"></script>
-	<body>
-		<div id="app" style="width: 80%; margin:0 auto;">
-				<span >选择版本：
-					<el-select v-model="selectValue" placeholder="请选择" @change="selectVersion">
-						<el-option v-for="version in versionList" :key="version" :label="version" :value="version"></el-option>
-					</el-select>
-					<el-button size="small" v-on:click="removeCache" >拉取最新Jar</el-button>
-					{{ message }}
-				</span>
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+	<link rel="stylesheet" href="css/interface.css">
+	<title>接口列表</title>
+</head>
+<script src="js/utils.js"></script>
+<body>
+<div id="app" style="width: 80%; margin:0 auto;">
 
-			<el-container width="80%">
-			  <!-- <el-header>Header</el-header> -->
 
-				<el-container>
-				<el-aside width="35%">
-					<el-row :gutter="20">
-					<el-col :span="23"><div class="grid-content bg-content">
-					<el-card class="box-card">
-						<div slot="header" class="clearfix" style="position:relative;">
-							<span style="float: left;">服务列表</span>
-						</div>
-							<el-table :data="serviceList" :show-header="false" style="width: 100%">
-							<el-table-column 		 prop="data"	>
-								<template slot-scope="scope">
-									<p>{{ scope.$index+1 }}.{{ scope.row.desc }}</p>
-									<a :href="'javascript:gotoUrl(\''+ scope.row.className +'\')'"  style="color:black;text-decoration:none;">{{ scope.row.className }}</a>
+	<el-container width="80%">
+		<el-header>
+					<span style="float: left;">选择版本：
+						<el-select v-model="selectValue" placeholder="请选择" @change="selectVersion">
+							<el-option v-for="version in versionList" :key="version" :label="version" :value="version"></el-option>
+						</el-select>
+						<el-button size="small" v-on:click="removeCache" >拉取最新Jar</el-button>
+						{{ message }}
+					</span>
+		</el-header>
+
+		<el-container>
+			<el-aside width="35%">
+				<el-row :gutter="20" style="margin:auto 0px;">
+					<el-col :span="24" style="padding-left: 2px;"><div class="grid-content bg-content">
+						<el-card class="box-card">
+							<div slot="header" class="clearfix" style="position:relative;">
+								<span style="float: left;">服务列表</span>
+							</div>
+							<el-table :data="serviceList" :show-header="false" style="width: :;0%">
+								<el-table-column 		 prop="data"	>
+									<template slot-scope="scope">
+										<p>{{ scope.$index+1 }}.{{ scope.row.desc }}</p>
+										<a :href="'javascript:gotoUrl(\''+ scope.row.className +'\')'"  style="color:black;text-decoration:none;">{{ scope.row.className }}</a>
 									</template>
-							</el-table-column>
-						</el-table>
-					</el-card>
-					</div></el-col>
-					</el-row>
-					<el-row :gutter="20">
-					<el-col :span="23" ><div class="grid-content bg-content">
-					<el-card class="box-card">
-						<div slot="header" class="clearfix">
-							<span>方法列表</span>
-						</div>
+								</el-table-column>
+							</el-table>
+						</el-card>
+					</div>
+					</el-col>
+				</el-row>
+				<el-row :gutter="20" style="margin:auto 0px;margin-top: 10px;">
+					<el-col :span="24" style="padding-left: 2px;"><div class="grid-content bg-content">
+						<el-card class="box-card">
+							<div slot="header" class="clearfix">
+								<span>方法列表</span>
+							</div>
 							<el-table :data="interfaceList" :show-header="false" style="width: 100%">
 								<el-table-column 		 prop="data"	>
 									<template slot-scope="scope">
 										<p>{{ scope.$index+1 }}.{{ scope.row.desc }}</p>
 										<a :href="'javascript:gotoUrl(\''+ scope.row.className +'\',\''+ scope.row.methodName +'\')'"  style="color:black;text-decoration:none;">{{ scope.row.methodName }}</a>
-										</template>
+									</template>
 								</el-table-column>
 							</el-table>
-					</el-card>
+						</el-card>
 					</div></el-col>
-					</el-row>
-				</el-aside>
-				<el-container>
+				</el-row>
+			</el-aside>
+			<el-container>
 				<el-main >
 					<el-card class="box-card" :data="interfaceInfo">
 						<div slot="header" class="clearfix">
 							<span>接口信息</span>
 						</div>
-							<el-row >
-									<el-col :span="100"><span class="fontSpan">接口名称:{{ interfaceInfo.desc }}</span></el-col>
-							</el-row>
-							<el-row >
-									<el-col :span="4"><span class="fontSpan" >方法名:{{ interfaceInfo.methodName }}</span></el-col>
-							</el-row>
-							<el-row >
-									<el-col :span="4"><span class="fontSpan" >用法:{{ interfaceInfo.usage }}</span></el-col>
-							</el-row>
-							<el-row >
-									<el-col :span="4"><a href="checkout.html" style="text-decoration:none;"><span>测试一把<span></a></el-col>
-							</el-row>
-							<el-row >
-									<el-col :span="4"><span class="fontSpan" >请求参数：{{ interfaceInfo.requestName }}</span></el-col>
-							</el-row>
-								<el-row :gutter="20">
-									<el-col :span="24" ><div style="text-align:center;border:1px solid  #99a9bf;">
-											<el-table :data="requestData" style="width: 100%">
-											<el-table-column      label="参数名称"        prop="name"></el-table-column>
-											<el-table-column      label="参数类型"        prop="dataType"></el-table-column>
-											<el-table-column      label="必输"        	prop="required" :formatter="toString"></el-table-column>
-											<el-table-column      label="参数描述"        prop="desc"></el-table-column>
-											<el-table-column      label="字典描述"        prop="enumDesc"></el-table-column>
-										</el-table>
-									</div></el-col>
-							</el-row>
-							<el-row >
-									<el-col :span="4"><span class="fontSpan">应答参数：{{ interfaceInfo.responseName }}</span></el-col>
-							</el-row>
-								<el-row :gutter="20">
-									<el-col :span="24" ><div style="text-align:center;border:1px solid  #99a9bf;">
-											<el-table :data="responseData" style="width: 100%">
-											<el-table-column      label="参数名称"        prop="name"></el-table-column>
-											<el-table-column      label="参数类型"        prop="dataType"></el-table-column>
-											<el-table-column      label="必输"        prop="required" :formatter="toString"></el-table-column>
-											<el-table-column      label="参数描述"        prop="desc"></el-table-column>
-											<el-table-column      label="字典描述"        prop="enumDesc"></el-table-column>
-										</el-table>
-									</div></el-col>
-							</el-row>
+						<el-row >
+							<el-col :span="100"><span class="fontSpan">接口名称:{{ interfaceInfo.desc }}</span></el-col>
+						</el-row>
+						<el-row >
+							<el-col :span="4"><span class="fontSpan" >方法名:{{ interfaceInfo.methodName }}</span></el-col>
+						</el-row>
+						<el-row >
+							<el-col :span="4"><span class="fontSpan" >用法:{{ interfaceInfo.usage }}</span></el-col>
+						</el-row>
+						<el-row >
+							<el-col :span="4"><a href="checkout.html" style="text-decoration:none;"><span>测试一把<span></a></el-col>
+						</el-row>
+						<el-row >
+							<el-col :span="4"><span class="fontSpan" >请求参数：{{ interfaceInfo.requestName }}</span></el-col>
+						</el-row>
+						<el-row :gutter="20">
+							<el-col :span="24" ><div style="text-align:center;border:1px solid  #99a9bf;">
+								<el-table :data="requestData" style="width: 100%">
+									<el-table-column      label="参数名称"        prop="name"></el-table-column>
+									<el-table-column      label="参数类型"        prop="dataType"></el-table-column>
+									<el-table-column      label="必输"        	prop="required" :formatter="toString"></el-table-column>
+									<el-table-column      label="参数描述"        prop="desc"></el-table-column>
+									<el-table-column      label="字典描述"        prop="enumDesc"></el-table-column>
+								</el-table>
+							</div></el-col>
+						</el-row>
+						<el-row >
+							<el-col :span="4"><span class="fontSpan">应答参数：{{ interfaceInfo.responseName }}</span></el-col>
+						</el-row>
+						<el-row :gutter="20">
+							<el-col :span="24" ><div style="text-align:center;border:1px solid  #99a9bf;">
+								<el-table :data="responseData" style="width: 100%">
+									<el-table-column      label="参数名称"        prop="name"></el-table-column>
+									<el-table-column      label="参数类型"        prop="dataType"></el-table-column>
+									<el-table-column      label="必输"        prop="required" :formatter="toString"></el-table-column>
+									<el-table-column      label="参数描述"        prop="desc"></el-table-column>
+									<el-table-column      label="字典描述"        prop="enumDesc"></el-table-column>
+								</el-table>
+							</div></el-col>
+						</el-row>
 					</el-card>
 				</el-main>
-				</el-container>
-			  </el-container>
 			</el-container>
-		</div>
-	</body>
-	<script src="//unpkg.com/vue/dist/vue.js"></script>
-	<script src="//unpkg.com/vue-router/dist/vue-router.js"></script>
-	<script src="//unpkg.com/element-ui@2.4.11/lib/index.js"></script>
-	<script src="js/axios.min.js"></script>
-	<script type="text/javascript">
-		var appInfo = {};
-		appInfo.applicationName=getUrlKey("applicationName");
-		appInfo.groupId=getUrlKey("groupId");
-		appInfo.artifactId=getUrlKey("artifactId")
-		appInfo.version=getUrlKey("version");
-		urlService= getUrlKey("service");
-		urlMethod= getUrlKey("method");
+		</el-container>
+	</el-container>
+</div>
+</body>
+<script src="//unpkg.com/vue/dist/vue.js"></script>
+<script src="//unpkg.com/vue-router/dist/vue-router.js"></script>
+<script src="//unpkg.com/element-ui@2.4.11/lib/index.js"></script>
+<script src="js/axios.min.js"></script>
+<script type="text/javascript">
+    var appInfo = {};
+    appInfo.applicationName=getUrlKey("applicationName");
+    appInfo.groupId=getUrlKey("groupId");
+    appInfo.artifactId=getUrlKey("artifactId")
+    appInfo.version=getUrlKey("version");
+    urlService= getUrlKey("service");
+    urlMethod= getUrlKey("method");
 
-		function gotoUrl(service,method){
-			//alert(service)
-			url ="document.html?a=1";
-			if(appInfo.applicationName){
-				url=url+"&applicationName="+appInfo.applicationName;
-			}
-			if(appInfo.groupId){
-				url=url+"&groupId="+appInfo.groupId;
-			}
-			if(appInfo.artifactId){
-				url=url+"&artifactId="+appInfo.artifactId;
-			}
-			if(appInfo.version){
-				url=url+"&version="+appInfo.version;
-			}
-			if(service){
-				url=url+"&service="+service;
-			}
+    function gotoUrl(service,method){
+        //alert(service)
+        url ="document.html?a=1";
+        if(appInfo.applicationName){
+            url=url+"&applicationName="+appInfo.applicationName;
+        }
+        if(appInfo.groupId){
+            url=url+"&groupId="+appInfo.groupId;
+        }
+        if(appInfo.artifactId){
+            url=url+"&artifactId="+appInfo.artifactId;
+        }
+        if(appInfo.version){
+            url=url+"&version="+appInfo.version;
+        }
+        if(service){
+            url=url+"&service="+service;
+        }
 
-			if(method){
-				url=url+"&method="+method;
-			}
+        if(method){
+            url=url+"&method="+method;
+        }
 
-			location.href=url;
-		}
+        location.href=url;
+    }
 
-		const vm = new Vue({
-			el: '#app',
-			data:{
-				serviceList: [],
-				interfaceList: [],
-				interfaceInfo:{},
-				requestData: [],
-				responseData: [],
-				versionList: [],
-				selectValue:appInfo.version,
-				message:""
-			},
-			created: {
+    const vm = new Vue({
+        el: '#app',
+        data:{
+            serviceList: [],
+            interfaceList: [],
+            interfaceInfo:{},
+            requestData: [],
+            responseData: [],
+            versionList: [],
+            selectValue:appInfo.version,
+            message:""
+        },
+        created: {
 
-			},
-			methods: {
-				getDoc(){
-					extVar="?1=1";
-					if(urlService){
-						extVar=extVar+"&service="+urlService;
-					}
-					if(urlMethod){
-						extVar=extVar+"&method="+urlMethod;
-					}
+        },
+        methods: {
+            getDoc(){
+                extVar="?1=1";
+                if(urlService){
+                    extVar=extVar+"&service="+urlService;
+                }
+                if(urlMethod){
+                    extVar=extVar+"&method="+urlMethod;
+                }
 
-					axios.post('/apiDoc/document'+extVar,
-							appInfo
-						).then(response => {
-							this.serviceList=response.data.serviceList;
-							if(response.data.interfaceList){
-								this.interfaceList=response.data.interfaceList;
-							}
-							if(response.data.interfaceInfo){
-								this.interfaceInfo=response.data.interfaceInfo;
-								this.requestData=this.interfaceInfo.request;
-								this.responseData=this.interfaceInfo.response;
-							}
+                axios.post('/apiDoc/document'+extVar,
+                    appInfo
+                ).then(response => {
+                    this.serviceList=response.data.serviceList;
+                    if(response.data.interfaceList){
+                        this.interfaceList=response.data.interfaceList;
+                    }
+                    if(response.data.interfaceInfo){
+                        this.interfaceInfo=response.data.interfaceInfo;
+                        this.requestData=this.interfaceInfo.request;
+                        this.responseData=this.interfaceInfo.response;
+                    }
 
-							console.log(response.data)
-							})
-						.catch(error => {
-								console.log(response.data)
-						});
-				},
-				selectVersion(){
-					appInfo.version=this.selectValue;
-					gotoUrl();
-				},
-				removeCache(){
-					axios.post('/apiDoc/removeCache', appInfo).then(response => {
-						this.message=response.data;
-						console.log(response.data)
-					})
-					.catch(error => {
-							console.log(response.data)
-					});
-				},
-				toString(row){
-					if(undefined==row.required){
-						return "";
-					}else {
-						return row.required.toString();
-					}
-				}
-			},
-			mounted(){
-				if(!appInfo.version){
-					axios.post('/index/getJarVersions',
-							appInfo
-					).then(response => {
-						appInfo.version = response.data[0];
-						this.versionList=response.data;
-						this.selectValue = appInfo.version;
-					console.log(response.data);
+                    console.log(response.data)
+                })
+                    .catch(error => {
+                        console.log(response.data)
+                    });
+            },
+            selectVersion(){
+                appInfo.version=this.selectValue;
+                gotoUrl();
+            },
+            removeCache(){
+                axios.post('/apiDoc/removeCache', appInfo).then(response => {
+                    this.message=response.data;
+                    console.log(response.data)
+                })
+                    .catch(error => {
+                        console.log(response.data)
+                    });
+            },
+            toString(row){
+                if(undefined==row.required){
+                    return "";
+                }else {
+                    return row.required.toString();
+                }
+            }
+        },
+        mounted(){
+            if(!appInfo.version){
+                axios.post('/index/getJarVersions',
+                    appInfo
+                ).then(response => {
+                        appInfo.version = response.data[0];
+                        this.versionList=response.data;
+                        this.selectValue = appInfo.version;
+                        console.log(response.data);
 
-					this.getDoc();
-					}
-				)
-				.catch(error => {
-						console.log(response.data);
-				});
-				}else {
-					axios.post('/index/getJarVersions',appInfo
-					).then(response => {
-						this.versionList=response.data;
-					this.selectValue = appInfo.version;
-						console.log(response.data);
-					}).catch(error => {
-						console.log(response.data);
-					});
+                        this.getDoc();
+                    }
+                )
+                    .catch(error => {
+                        console.log(response.data);
+                    });
+            }else {
+                axios.post('/index/getJarVersions',appInfo
+                ).then(response => {
+                    this.versionList=response.data;
+                    this.selectValue = appInfo.version;
+                    console.log(response.data);
+                }).catch(error => {
+                    console.log(response.data);
+                });
 
-					this.getDoc();
-				}
-			}
-		})
-	</script>
-		<style>
-			.el-header{
-			background-color: #B3C0D1;
-			color: #333;
-			text-align: center;
-			line-height: 60px;
-		  }
-		  
-		  .el-aside {
-			color: #333;
-			/* text-align: left; */
-			/* line-height: 200px; */
-		  }
-		  
-		  .el-main {
-			background-color: #E9EEF3;
-			color: #333;
-			/* width: auto; */
-		  }
-		  
-		  body > .el-container {
-			/* margin-bottom: 40px; */
-		  }
-		  
-		  .el-container:nth-child(5) .el-aside,
-		  .el-container:nth-child(6) .el-aside {
-			/* line-height: 260px; */
-		  }
-		  
-		  .el-container:nth-child(7) .el-aside {
-			/* line-height: 320px; */
-		  }
-	  .el-card__header {
-	    background: #f5f5f5;
+                this.getDoc();
+            }
+        }
+    })
+</script>
+<style>
+	.el-header{
+		background-color: #B3C0D1;
+		color: #333;
+		text-align: center;
+		line-height: 60px;
+	}
+
+	.el-aside {
+		color: #333;
+		/* text-align: left; */
+		/* line-height: 200px; */
+	}
+
+	.el-main {
+		background-color: #E9EEF3;
+		color: #333;
+		/* width: auto; */
+	}
+
+	body > .el-container {
+		/* margin-bottom: 40px; */
+	}
+
+	.el-container:nth-child(5) .el-aside,
+	.el-container:nth-child(6) .el-aside {
+		/* line-height: 260px; */
+	}
+
+	.el-container:nth-child(7) .el-aside {
+		/* line-height: 320px; */
+	}
+	.el-card__header {
+		background: #f5f5f5;
 		height: 30px;
 		line-height: 2px;
 	}
@@ -295,5 +298,5 @@
 		height:30px;
 		line-height:30px;
 	}
-		</style>
+</style>
 </html>
